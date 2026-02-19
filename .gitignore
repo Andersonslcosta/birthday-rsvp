@@ -1,0 +1,47 @@
+# Birthday RSVP - .gitignore
+# Ignora arquivos sensíveis e desnecessários
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+/dist
+/build
+out/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+birthday.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Runtime
+/tmp/
+/temp/

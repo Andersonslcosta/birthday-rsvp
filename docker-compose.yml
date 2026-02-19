@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_PATH=/app/data/birthday.db
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-pequenopríncipe2025}
+      - JWT_SECRET=${JWT_SECRET:-seu-secret-jwt-super-seguro}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5000}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
