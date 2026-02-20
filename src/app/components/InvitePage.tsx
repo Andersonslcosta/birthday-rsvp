@@ -9,12 +9,12 @@ import { toast } from 'sonner';
 import { saveRSVP } from '../utils/api';
 import type { Participant } from '../utils/api';
 import headerImage from '../../assets/header-image.jpg';
-import oliverImage from '../../assets/oliver-image.jpeg';
 
 export function InvitePage() {
   const [responsibleName, setResponsibleName] = useState('');
   const [confirmation, setConfirmation] = useState<'sim' | 'nao'>('sim');
   const [participants, setParticipants] = useState<Participant[]>([{ name: '', age: null, isChild: false }]);
+  const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Atualiza o primeiro participante quando o nome do responsável muda e confirmação é "sim"
@@ -101,6 +101,7 @@ export function InvitePage() {
               isChild: p.isChild,
             }))
           : [],
+      message: message.trim(),
     })
       .then(() => {
         toast.success(
@@ -113,6 +114,7 @@ export function InvitePage() {
         setResponsibleName('');
         setConfirmation('sim');
         setParticipants([{ name: '', age: null, isChild: false }]);
+        setMessage('');
       })
       .catch((error) => {
         console.error(error);
@@ -178,7 +180,7 @@ export function InvitePage() {
             </div>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1 className="text-6xl md:text-8xl text-blue-900 drop-shadow-sm mb-4" style={{ fontFamily: '"Dancing Script", cursive', fontWeight: 700 }}>
             Oliver faz 1 Aninho
           </h1>
           
@@ -189,18 +191,15 @@ export function InvitePage() {
           </p>
         </motion.div>
 
-        {/* Imagens do evento */}
+        {/* Imagem do evento */}
         <motion.div
-          className="mb-12 space-y-4"
+          className="mb-12"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="flex items-center justify-center">
-            <img src={headerImage} alt="Oliver" className="w-full max-w-sm rounded-2xl shadow-2xl" />
-          </div>
-          <div className="flex items-center justify-center">
-            <img src={oliverImage} alt="Oliver celebrando" className="w-full max-w-sm rounded-2xl shadow-2xl" />
+            <img src={headerImage} alt="Oliver" className="w-full rounded-2xl shadow-2xl" />
           </div>
         </motion.div>
 
@@ -412,6 +411,21 @@ export function InvitePage() {
                     </p>
                   </div>
                 )}
+
+                {/* Campo de Mensagem */}
+                <div>
+                  <Label htmlFor="message" className="text-blue-900">
+                    Mensagem (Opcional)
+                  </Label>
+                  <textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Deixe uma mensagem para o aniversariante..."
+                    className="w-full mt-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={4}
+                  />
+                </div>
 
                 {/* Botão de Envio */}
                 <Button
