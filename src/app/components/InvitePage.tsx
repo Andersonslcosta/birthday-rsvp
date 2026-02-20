@@ -392,7 +392,7 @@ export function InvitePage() {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Enviando...' : 'Confirmar minha resposta'}
+                  {isSubmitting ? 'Enviando...' : 'Confirmar Presença'}
                 </Button>
               </form>
             </CardContent>
