@@ -180,7 +180,7 @@ export function InvitePage() {
             </div>
           </div>
           
-          <h1 className="text-6xl md:text-8xl text-blue-900 drop-shadow-sm mb-4" style={{ fontFamily: '"Dancing Script", cursive', fontWeight: 700 }}>
+          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm mb-4">
             Oliver faz 1 Aninho
           </h1>
           
