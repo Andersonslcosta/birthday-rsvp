@@ -8,6 +8,8 @@ import { Card, CardContent } from './ui/card';
 import { toast } from 'sonner';
 import { saveRSVP } from '../utils/api';
 import type { Participant } from '../utils/api';
+import headerImage from '../../assets/header-image.jpg';
+import oliverImage from '../../assets/oliver-image.jpeg';
 
 export function InvitePage() {
   const [responsibleName, setResponsibleName] = useState('');
@@ -176,7 +178,7 @@ export function InvitePage() {
             </div>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm">
+          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm mb-4" style={{ fontFamily: 'var(--font-display)' }}>
             Oliver faz 1 Aninho
           </h1>
           
@@ -195,10 +197,10 @@ export function InvitePage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="flex items-center justify-center">
-            <img src="/assets/header-image.jpg" alt="Oliver" className="w-full max-w-sm rounded-2xl shadow-2xl" />
+            <img src={headerImage} alt="Oliver" className="w-full max-w-sm rounded-2xl shadow-2xl" />
           </div>
           <div className="flex items-center justify-center">
-            <img src="/assets/oliver-image.jpeg" alt="Oliver celebrando" className="w-full max-w-sm rounded-2xl shadow-2xl" />
+            <img src={oliverImage} alt="Oliver celebrando" className="w-full max-w-sm rounded-2xl shadow-2xl" />
           </div>
         </motion.div>
 
@@ -278,7 +280,7 @@ export function InvitePage() {
                   <Label className="text-blue-900 mb-3 block">
                     Confirmação de presença *
                   </Label>
-                  <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <label className={`cursor-pointer border-2 rounded-2xl p-4 text-center transition-all duration-200 ${
                       confirmation === 'sim'
                         ? 'border-green-400 bg-green-50 text-green-700 shadow-md transform scale-[1.02]'
