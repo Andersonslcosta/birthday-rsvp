@@ -44,7 +44,16 @@ export function InvitePage() {
   ) => {
     const updated = [...participants];
     if (field === 'name') {
-      updated[index] = { ...updated[index], name: value };
+      const newName = value;
+      // Verificar se já existe outro participante com este nome (case-insensitive)
+      const existingIndex = updated.findIndex(
+        (p, i) => i !== index && p.name.trim().toLowerCase() === newName.trim().toLowerCase()
+      );
+      if (existingIndex !== -1) {
+        // Remover o participante com nome duplicado
+        updated.splice(existingIndex, 1);
+      }
+      updated[index] = { ...updated[index], name: newName };
     } else if (field === 'isChild') {
       const isChild = value === 'true';
       updated[index] = { ...updated[index], isChild, age: null };
@@ -59,8 +68,8 @@ export function InvitePage() {
     e.preventDefault();
 
     // Validações
-    if (!responsibleName.trim()) {
-      toast.error('Por favor, preencha seu nome completo');
+    if (!responsibleName.trim() || responsibleName.trim().length < 7) {
+      toast.error('Nome Completo deve ter no mínimo 7 caracteres');
       return;
     }
 
@@ -247,14 +256,14 @@ export function InvitePage() {
           <Card className="bg-white/90 backdrop-blur-sm border-2 border-blue-200 shadow-xl">
             <CardContent className="p-6 md:p-8">
               <h2 className="text-2xl md:text-3xl text-blue-900 mb-6 text-center">
-                Confirme sua presença
+                Ficha de Informação
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Nome do Responsável */}
                 <div>
                   <Label htmlFor="responsibleName" className="text-blue-900">
-                    Nome completo do responsável *
+                    Nome Completo *
                   </Label>
                   <Input
                     id="responsibleName"
@@ -392,7 +401,7 @@ export function InvitePage() {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Enviando...' : 'Confirmar Presença'}
+                  {isSubmitting ? 'Enviando...' : 'Confirmar Informações'}
                 </Button>
               </form>
             </CardContent>
