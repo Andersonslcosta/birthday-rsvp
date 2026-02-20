@@ -8,7 +8,7 @@
 
 interface Participant {
   name: string;
-  age: number;
+  age: number | null;
   isChild: boolean;
 }
 
@@ -29,7 +29,7 @@ function validateEmail(email: string): boolean {
 }
 
 function validateName(name: string): boolean {
-  return name && name.trim().length >= 2 && name.length <= 100;
+  return typeof name === 'string' && name.trim().length >= 2 && name.length <= 100;
 }
 
 function validateAge(age: number): boolean {
@@ -62,8 +62,14 @@ function validateRSVP(rsvp: any): { valid: boolean; errors: string[] } {
         if (!validateName(p.name)) {
           errors.push(`❌ Participante ${i}: nome inválido`);
         }
-        if (!validateAge(p.age)) {
-          errors.push(`❌ Participante ${i}: idade inválida (0-120)`);
+        if (p.isChild) {
+          if (p.age === null || !validateAge(p.age)) {
+            errors.push(`❌ Participante ${i}: idade inválida para criança (0-120)`);
+          }
+        } else {
+          if (p.age !== null && !validateAge(p.age)) {
+            errors.push(`❌ Participante ${i}: idade inválida (0-120)`);
+          }
         }
       });
       if (errors.length === 0) {

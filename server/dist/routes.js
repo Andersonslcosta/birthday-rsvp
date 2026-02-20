@@ -23,8 +23,20 @@ function validateRSVPData(data) {
             if (!p.name || typeof p.name !== 'string') {
                 throw new Error('Nome de todos os participantes é obrigatório');
             }
-            if (typeof p.age !== 'number' || p.age < 0 || p.age > 120) {
-                throw new Error('Idade dos participantes deve estar entre 0 e 120');
+            if (typeof p.isChild !== 'boolean') {
+                throw new Error('Campo isChild inválido para participante');
+            }
+            if (p.isChild) {
+                if (typeof p.age !== 'number' || p.age < 0 || p.age > 120) {
+                    throw new Error('Idade das crianças deve estar entre 0 e 120');
+                }
+            }
+            else {
+                if (p.age !== null && typeof p.age === 'number') {
+                    if (p.age < 0 || p.age > 120) {
+                        throw new Error('Idade dos participantes deve estar entre 0 e 120');
+                    }
+                }
             }
         }
         if (totalPeople !== participants.length) {
@@ -37,8 +49,8 @@ function validateRSVPData(data) {
         participants: confirmation === 'sim'
             ? participants.map((p) => ({
                 name: p.name.trim(),
-                age: Math.floor(p.age),
-                isChild: Math.floor(p.age) < 18,
+                age: p.age === null ? null : Math.floor(p.age),
+                isChild: Boolean(p.isChild),
             }))
             : [],
         totalPeople: confirmation === 'sim' ? participants.length : 0,
@@ -186,7 +198,7 @@ router.get('/api/admin/export', authMiddleware, async (req, res) => {
                 index === 0 ? 'Sim' : '',
                 index === 0 ? rsvp.totalPeople.toString() : '',
                 participant.name,
-                participant.age.toString(),
+                participant.age === null ? '-' : participant.age.toString(),
                 index === 0 ? new Date(rsvp.timestamp).toLocaleString('pt-BR') : '',
             ]);
         });

@@ -9,7 +9,7 @@ const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../data/birthd
 
 export interface Participant {
   name: string;
-  age: number;
+  age: number | null;
   isChild: boolean;
 }
 

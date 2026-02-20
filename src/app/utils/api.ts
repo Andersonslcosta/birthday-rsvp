@@ -1,6 +1,6 @@
 export interface Participant {
   name: string;
-  age: number;
+  age: number | null;
   isChild: boolean;
 }
 
@@ -46,7 +46,8 @@ export const saveRSVP = async (guest: Omit<Guest, 'id' | 'timestamp'>): Promise<
     totalPeople: guest.totalPeople,
     participants: guest.participants.map((p) => ({
       name: p.name,
-      age: p.age,
+      age: p.age === null ? null : p.age,
+      isChild: p.isChild,
     })),
   };
 
