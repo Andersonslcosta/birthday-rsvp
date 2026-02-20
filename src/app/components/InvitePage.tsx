@@ -4,7 +4,6 @@ import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Card, CardContent } from './ui/card';
 import { toast } from 'sonner';
 import { saveRSVP } from '../utils/api';
@@ -177,8 +176,8 @@ export function InvitePage() {
             </div>
           </div>
           
-          <h1 className="text-4xl md:text-6xl text-blue-900 mb-4">
-            O pequeno príncipe completa 1 aninho ✨
+          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm">
+            Oliver faz 1 Aninho
           </h1>
           
           <p className="text-lg md:text-xl text-blue-700 italic max-w-2xl mx-auto">
@@ -188,19 +187,18 @@ export function InvitePage() {
           </p>
         </motion.div>
 
-        {/* Banner com imagem */}
+        {/* Imagens do evento */}
         <motion.div
-          className="mb-12 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-blue-300 via-blue-200 to-amber-200 p-8"
+          className="mb-12 space-y-4"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">👑</div>
-              <p className="text-2xl font-bold text-blue-900">Oliver faz 1 aninho!</p>
-              <p className="text-blue-700 mt-2">Venha celebrar este momento mágico conosco</p>
-            </div>
+            <img src="/assets/header-image.jpg" alt="Oliver" className="w-full max-w-sm rounded-2xl shadow-2xl" />
+          </div>
+          <div className="flex items-center justify-center">
+            <img src="/assets/oliver-image.jpeg" alt="Oliver celebrando" className="w-full max-w-sm rounded-2xl shadow-2xl" />
           </div>
         </motion.div>
 
@@ -280,23 +278,41 @@ export function InvitePage() {
                   <Label className="text-blue-900 mb-3 block">
                     Confirmação de presença *
                   </Label>
-                  <RadioGroup
-                    value={confirmation}
-                    onValueChange={(value) => setConfirmation(value as 'sim' | 'nao')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="sim" id="sim" />
-                      <Label htmlFor="sim" className="cursor-pointer">
-                        Sim, estarei presente! 🎉
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="nao" id="nao" />
-                      <Label htmlFor="nao" className="cursor-pointer">
-                        Não poderei comparecer 😢
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                  <div className="flex flex-col gap-3">
+                    <label className={`cursor-pointer border-2 rounded-2xl p-4 text-center transition-all duration-200 ${
+                      confirmation === 'sim'
+                        ? 'border-green-400 bg-green-50 text-green-700 shadow-md transform scale-[1.02]'
+                        : 'border-gray-100 hover:border-blue-200 text-gray-500'
+                    }`}>
+                      <input
+                        type="radio"
+                        className="sr-only"
+                        name="confirmation"
+                        value="sim"
+                        checked={confirmation === 'sim'}
+                        onChange={() => setConfirmation('sim')}
+                      />
+                      <span className="block text-2xl mb-1">✨</span>
+                      <span className="font-bold block">Sim, irei!</span>
+                    </label>
+
+                    <label className={`cursor-pointer border-2 rounded-2xl p-4 text-center transition-all duration-200 ${
+                      confirmation === 'nao'
+                        ? 'border-red-400 bg-red-50 text-red-700 shadow-md transform scale-[1.02]'
+                        : 'border-gray-100 hover:border-blue-200 text-gray-500'
+                    }`}>
+                      <input
+                        type="radio"
+                        className="sr-only"
+                        name="confirmation"
+                        value="nao"
+                        checked={confirmation === 'nao'}
+                        onChange={() => setConfirmation('nao')}
+                      />
+                      <span className="block text-2xl mb-1">😢</span>
+                      <span className="font-bold block">Não poderei</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Lista de Participantes */}
