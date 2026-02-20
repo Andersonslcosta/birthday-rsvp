@@ -39,23 +39,18 @@ export function InvitePage() {
 
   const updateParticipant = (
     index: number,
-    field: 'name' | 'age' | 'isChild',
+    field: 'name' | 'isChild' | 'age',
     value: string
   ) => {
     const updated = [...participants];
     if (field === 'name') {
       updated[index] = { ...updated[index], name: value };
-    } else if (field === 'age') {
-      const parsed = value === '' ? null : parseInt(value);
-      const age = parsed === null ? null : isNaN(parsed) ? null : parsed;
-      updated[index] = {
-        ...updated[index],
-        age,
-        isChild: age !== null ? age < 18 : updated[index].isChild,
-      };
     } else if (field === 'isChild') {
       const isChild = value === 'true';
-      updated[index] = { ...updated[index], isChild, age: isChild ? updated[index].age : null };
+      updated[index] = { ...updated[index], isChild, age: null };
+    } else if (field === 'age') {
+      const age = value === '' ? null : parseInt(value);
+      updated[index] = { ...updated[index], age };
     }
     setParticipants(updated);
   };
@@ -72,9 +67,7 @@ export function InvitePage() {
     if (confirmation === 'sim') {
       const invalidParticipant = participants.find((p) => {
         if (!p.name.trim()) return true;
-        if (p.isChild) {
-          return p.age === null || p.age < 0;
-        }
+        if (p.isChild && (p.age === null || p.age < 0)) return true;
         return false;
       });
       if (invalidParticipant) {
@@ -94,7 +87,7 @@ export function InvitePage() {
         confirmation === 'sim'
           ? participants.map((p) => ({
               name: p.name.trim(),
-              age: p.isChild && p.age !== null ? Math.floor(p.age) : null,
+              age: p.isChild && p.age !== null ? p.age : null,
               isChild: p.isChild,
             }))
           : [],
@@ -210,7 +203,7 @@ export function InvitePage() {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <Card className="mb-8 bg-white/90 backdrop-blur-sm border-2 border-amber-200 shadow-xl">
-            <CardContent className="p-6 md:p-8 pt-4">
+            <CardContent className="p-6 md:p-8">
               <h2 className="text-2xl md:text-3xl text-blue-900 mb-6 text-center flex items-center justify-center gap-2">
                 <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
                 Detalhes da Festa
@@ -337,29 +330,42 @@ export function InvitePage() {
                               className={index === 0 ? "bg-blue-50" : ""}
                             />
                           </div>
-                          <div className="w-28">
+
+                          {/* Seletor Adulto/Criança */}
+                          <div className="w-32">
                             <select
                               value={String(participant.isChild)}
-                              onChange={(e) => updateParticipant(index, 'isChild', e.target.value)}
-                              className="w-full border rounded px-2 py-2"
+                              onChange={(e) =>
+                                updateParticipant(index, 'isChild', e.target.value)
+                              }
+                              className="w-full border border-gray-300 rounded px-2 py-2 text-sm"
                             >
                               <option value="false">Adulto</option>
                               <option value="true">Criança</option>
                             </select>
                           </div>
-                          <div className="w-24">
-                            <Input
-                              placeholder="Idade"
-                              type="number"
-                              min="0"
-                              max="120"
-                              value={participant.age ?? ''}
-                              onChange={(e) =>
-                                updateParticipant(index, 'age', e.target.value)
-                              }
-                              required={confirmation === 'sim' && participant.isChild}
-                            />
-                          </div>
+
+                          {/* Idade - SOMENTE visível para crianças */}
+                          {participant.isChild && (
+                            <div className="w-24">
+                              <select
+                                value={String(participant.age ?? '')}
+                                onChange={(e) =>
+                                  updateParticipant(index, 'age', e.target.value)
+                                }
+                                className="w-full border border-gray-300 rounded px-2 py-2 text-sm"
+                                required
+                              >
+                                <option value="">Idade</option>
+                                {Array.from({ length: 16 }, (_, i) => (
+                                  <option key={i} value={String(i)}>
+                                    {i} anos
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
                           {participants.length > 1 && index > 0 && (
                             <Button
                               type="button"
@@ -387,7 +393,7 @@ export function InvitePage() {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Enviando...' : 'Confirmar Presença'}
+                  {isSubmitting ? 'Enviando...' : 'Confirmar minha resposta'}
                 </Button>
               </form>
             </CardContent>
