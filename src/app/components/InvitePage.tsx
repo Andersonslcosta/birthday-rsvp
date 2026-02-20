@@ -91,7 +91,6 @@ export function InvitePage() {
               isChild: p.isChild,
             }))
           : [],
-      timestamp: new Date().toISOString(),
     })
       .then(() => {
         toast.success(
