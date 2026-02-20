@@ -20,7 +20,7 @@ export interface RsvpPayload {
   participants: Participant[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:5000';
 
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
