@@ -89,17 +89,34 @@ export function AdminPanel() {
 
   const handleExportCSV = async () => {
     try {
-      if (!token) return;
+      if (!token) {
+        toast.error('Token de autenticação não encontrado');
+        return;
+      }
       const blob = await exportToCSV(token);
+      
+      // Verificar se o blob está vazio
+      if (blob.size === 0) {
+        toast.error('Erro: arquivo vazio recebido');
+        return;
+      }
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
       link.setAttribute('download', `confirmacoes_aniversario_${Date.now()}.csv`);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      
+      // Limpar recursos
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
       toast.success('Dados exportados com sucesso!');
     } catch (error: any) {
+      console.error('Erro ao exportar:', error);
       toast.error('Erro ao exportar dados: ' + (error.message || 'Tente novamente'));
     }
   };

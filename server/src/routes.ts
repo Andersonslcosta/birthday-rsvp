@@ -224,6 +224,7 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
     const rsvps = await getAllRSVPs();
 
     if (rsvps.length === 0) {
+      console.warn('[Export] Nenhuma confirmação para exportar');
       return res.status(400).json({
         success: false,
         error: 'Nenhuma confirmação para exportar',
@@ -273,10 +274,14 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
       ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
     ].join('\n');
 
-    res.setHeader('Content-Type', 'text/csv;charset=utf-8;');
-    res.setHeader('Content-Disposition', `attachment;filename=confirmacoes_aniversario_${Date.now()}.csv`);
+    console.log(`[Export] Exportando ${rsvps.length} confirmações (${csvContent.length} bytes)`);
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="confirmacoes_aniversario_${Date.now()}.csv"`);
+    res.setHeader('Content-Length', Buffer.byteLength(csvContent));
     res.send(csvContent);
   } catch (error: any) {
+    console.error('[Export] Erro ao exportar:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao exportar dados',

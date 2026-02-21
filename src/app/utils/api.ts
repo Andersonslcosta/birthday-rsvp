@@ -127,7 +127,19 @@ export const exportToCSV = async (token: string): Promise<Blob> => {
   });
 
   if (!response.ok) {
-    throw new Error('Erro ao exportar dados');
+    let errorMessage = 'Erro ao exportar dados';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch {
+      errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
+  }
+
+  const contentType = response.headers.get('Content-Type');
+  if (!contentType || !contentType.includes('text/csv')) {
+    throw new Error('Resposta inválida: esperado CSV');
   }
 
   return response.blob();
