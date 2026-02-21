@@ -1,6 +1,6 @@
 export interface Participant {
     name: string;
-    age: number;
+    age: number | null;
     isChild: boolean;
 }
 export interface RSVP {

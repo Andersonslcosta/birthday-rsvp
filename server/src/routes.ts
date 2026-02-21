@@ -1,14 +1,28 @@
 import express from 'express';
-import { saveRSVP, getAllRSVPs, geStatistics, deleteAllRSVPs } from './database.js';
+import { saveRSVP, getAllRSVPs, geStatistics, deleteAllRSVPs, deleteRSVPById } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
 import { generateToken } from './auth.js';
 
 const router = express.Router();
 
+// Constant-time comparison para evitar timing attacks
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 // Validar dados de RSVP
 function validateRSVPData(data: any) {
   const { responsibleName, confirmation, participants, totalPeople } = data;
+  const MAX_NAME_LENGTH = 200;
+  const MAX_PARTICIPANTS = 50;
 
   if (!responsibleName || typeof responsibleName !== 'string') {
     throw new Error('Nome do responsável é obrigatório');
@@ -16,6 +30,10 @@ function validateRSVPData(data: any) {
 
   if (responsibleName.trim().length < 2) {
     throw new Error('Nome do responsável deve ter pelo menos 2 caracteres');
+  }
+
+  if (responsibleName.trim().length > MAX_NAME_LENGTH) {
+    throw new Error(`Nome do responsável não pode exceder ${MAX_NAME_LENGTH} caracteres`);
   }
 
   if (!confirmation || !['sim', 'nao'].includes(confirmation)) {
@@ -27,9 +45,16 @@ function validateRSVPData(data: any) {
       throw new Error('Participantes é obrigatório quando confirmado');
     }
 
+    if (participants.length > MAX_PARTICIPANTS) {
+      throw new Error(`Máximo de ${MAX_PARTICIPANTS} participantes permitido`);
+    }
+
     for (const p of participants) {
       if (!p.name || typeof p.name !== 'string') {
         throw new Error('Nome de todos os participantes é obrigatório');
+      }
+      if (p.name.trim().length > MAX_NAME_LENGTH) {
+        throw new Error(`Nome de participante não pode exceder ${MAX_NAME_LENGTH} caracteres`);
       }
       if (typeof p.isChild !== 'boolean') {
         throw new Error('Campo isChild inválido para participante');
@@ -130,19 +155,35 @@ router.post('/api/admin/login', (req, res) => {
   try {
     const { password } = req.body;
 
-    if (!password) {
+    if (!password || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
-        error: 'Senha é obrigatória',
+        error: 'Credenciais inválidas',
       });
     }
 
-    const expectedPassword = process.env.ADMIN_PASSWORD || 'pequenopríncipe2025';
+    if (password.length > 200) {
+      return res.status(400).json({
+        success: false,
+        error: 'Credenciais inválidas',
+      });
+    }
 
-    if (password !== expectedPassword) {
+    const expectedPassword = process.env.ADMIN_PASSWORD;
+
+    if (!expectedPassword) {
+      console.error('ADMIN_PASSWORD not set in environment variables');
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao processar autenticação',
+      });
+    }
+
+    // Usar constant-time comparison para evitar timing attacks
+    if (!constantTimeCompare(password, expectedPassword)) {
       return res.status(401).json({
         success: false,
-        error: 'Senha incorreta',
+        error: 'Credenciais inválidas',
       });
     }
 
@@ -195,6 +236,7 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
       'Confirmação',
       'Total Pessoas',
       'Participante',
+      'Tipo',
       'Idade',
       'Data/Hora',
     ];
@@ -209,16 +251,18 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
             '0',
             '-',
             '-',
+            '-',
             new Date(rsvp.timestamp).toLocaleString('pt-BR'),
           ],
         ];
       }
-        return rsvp.participants.map((participant, index) => [
+      return rsvp.participants.map((participant, index) => [
         index === 0 ? rsvp.id : '',
         index === 0 ? rsvp.responsibleName : '',
         index === 0 ? 'Sim' : '',
         index === 0 ? rsvp.totalPeople.toString() : '',
         participant.name,
+        participant.isChild ? 'Criança' : 'Adulto',
         participant.age === null ? '-' : participant.age.toString(),
         index === 0 ? new Date(rsvp.timestamp).toLocaleString('pt-BR') : '',
       ]);
@@ -236,6 +280,39 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao exportar dados',
+    });
+  }
+});
+
+// DELETE /api/admin/rsvp/:id - Deletar RSVP específico (protegido)
+router.delete('/api/admin/rsvp/:id', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'ID inválido',
+      });
+    }
+
+    if (id.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID inválido',
+      });
+    }
+
+    await deleteRSVPById(id);
+    
+    res.json({
+      success: true,
+      message: 'Confirmação deletada com sucesso',
+    });
+  } catch (error: any) {
+    res.status(404).json({
+      success: false,
+      error: error.message || 'RSVP não encontrado',
     });
   }
 });

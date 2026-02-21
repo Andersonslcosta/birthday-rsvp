@@ -23,11 +23,8 @@ import {
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
-import { getGuests, getStatistics, clearAllData, adminLogin, exportToCSV } from '../utils/api';
+import { getGuests, getStatistics, clearAllData, adminLogin, exportToCSV, deleteRSVP } from '../utils/api';
 import type { Guest } from '../utils/api';
-
-// Senha simples para acesso administrativo
-const ADMIN_PASSWORD = 'pequenopríncipe2025';
 
 export function AdminPanel() {
   const navigate = useNavigate();
@@ -106,7 +103,18 @@ export function AdminPanel() {
       toast.error('Erro ao exportar dados: ' + (error.message || 'Tente novamente'));
     }
   };
-
+  const handleDeleteRSVP = async (rsvpId: string, responsibleName: string) => {
+    if (window.confirm(`Tem certeza que deseja deletar a confirmação de "${responsibleName}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        if (!token) return;
+        await deleteRSVP(token, rsvpId);
+        await loadData(token);
+        toast.success('Confirmação deletada com sucesso');
+      } catch (error: any) {
+        toast.error('Erro ao deletar confirmação: ' + (error.message || 'Tente novamente'));
+      }
+    }
+  };
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center p-4">
@@ -311,52 +319,83 @@ export function AdminPanel() {
                       <TableRow>
                         <TableHead>Responsável</TableHead>
                         <TableHead>Confirmação</TableHead>
-                        <TableHead>Participantes</TableHead>
+                        <TableHead>Participante</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Idade</TableHead>
                         <TableHead>Data/Hora</TableHead>
+                        <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {guests.map((guest) => (
-                        <TableRow key={guest.id}>
-                          <TableCell className="font-medium">
-                            {guest.responsibleName}
-                          </TableCell>
-                          <TableCell>
-                            {guest.confirmation === 'sim' ? (
+                      {guests.flatMap((guest) => {
+                        if (guest.confirmation === 'nao') {
+                          return [
+                            <TableRow key={`${guest.id}-declined`}>
+                              <TableCell className="font-medium">
+                                {guest.responsibleName}
+                              </TableCell>
+                              <TableCell>
+                                <span className="inline-flex items-center gap-1 text-red-700 bg-red-100 px-2 py-1 rounded-full text-sm">
+                                  <XCircle className="w-4 h-4" />
+                                  Não comparecerá
+                                </span>
+                              </TableCell>
+                              <TableCell>-</TableCell>
+                              <TableCell>-</TableCell>
+                              <TableCell>-</TableCell>
+                              <TableCell className="text-sm text-gray-600">
+                                {new Date(guest.timestamp).toLocaleString('pt-BR')}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => handleDeleteRSVP(guest.id, guest.responsibleName)}
+                                  disabled={isLoading}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>,
+                          ];
+                        }
+
+                        return guest.participants.map((participant, index) => (
+                          <TableRow key={`${guest.id}-${index}`}>
+                            <TableCell className="font-medium">
+                              {guest.responsibleName}
+                            </TableCell>
+                            <TableCell>
                               <span className="inline-flex items-center gap-1 text-green-700 bg-green-100 px-2 py-1 rounded-full text-sm">
                                 <CheckCircle className="w-4 h-4" />
                                 Confirmado
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-red-700 bg-red-100 px-2 py-1 rounded-full text-sm">
-                                <XCircle className="w-4 h-4" />
-                                Não comparecerá
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {guest.confirmation === 'sim' ? (
-                              <div className="space-y-1">
-                                <p className="font-medium">
-                                  Total: {guest.totalPeople} pessoa(s)
-                                </p>
-                                <div className="text-sm text-gray-600">
-                                  {guest.participants.map((p, i) => (
-                                    <div key={i}>
-                                      {p.name} ({p.age} anos)
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-gray-600">
-                            {new Date(guest.timestamp).toLocaleString('pt-BR')}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>{participant.name}</TableCell>
+                            <TableCell>{participant.isChild ? 'Criança' : 'Adulto'}</TableCell>
+                            <TableCell>
+                              {participant.age === null ? '-' : `${participant.age}`}
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-600">
+                              {new Date(guest.timestamp).toLocaleString('pt-BR')}
+                            </TableCell>
+                            <TableCell>
+                              {index === 0 && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => handleDeleteRSVP(guest.id, guest.responsibleName)}
+                                  disabled={isLoading}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ));
+                      })}
                     </TableBody>
                   </Table>
                 </div>
@@ -380,7 +419,7 @@ export function AdminPanel() {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Os dados são armazenados localmente no navegador (localStorage)</li>
                 <li>• Para acesso em outro dispositivo, use a função "Exportar CSV"</li>
-                <li>• A senha de acesso é: "pequenopríncipe2025"</li>
+                <li>• A senha de acesso é: "Pequenoprincipe2026@"</li>
                 <li>• Limpar dados remove todas as confirmações permanentemente</li>
               </ul>
             </CardContent>
@@ -389,4 +428,5 @@ export function AdminPanel() {
       </div>
     </div>
   );
+
 }

@@ -14,7 +14,6 @@ export function InvitePage() {
   const [responsibleName, setResponsibleName] = useState('');
   const [confirmation, setConfirmation] = useState<'sim' | 'nao'>('sim');
   const [participants, setParticipants] = useState<Participant[]>([{ name: '', age: null, isChild: false }]);
-  const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Atualiza o primeiro participante quando o nome do responsável muda e confirmação é "sim"
@@ -101,7 +100,6 @@ export function InvitePage() {
               isChild: p.isChild,
             }))
           : [],
-      message: message.trim(),
     })
       .then(() => {
         toast.success(
@@ -114,7 +112,6 @@ export function InvitePage() {
         setResponsibleName('');
         setConfirmation('sim');
         setParticipants([{ name: '', age: null, isChild: false }]);
-        setMessage('');
       })
       .catch((error) => {
         console.error(error);
@@ -180,7 +177,10 @@ export function InvitePage() {
             </div>
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm mb-4">
+          <h1
+            className="text-6xl md:text-8xl font-display text-blue-900 drop-shadow-sm mb-4"
+              style={{ fontFamily: '"Dancing Script", cursive' }}
+          >
             Oliver faz 1 Aninho
           </h1>
           
@@ -411,21 +411,6 @@ export function InvitePage() {
                     </p>
                   </div>
                 )}
-
-                {/* Campo de Mensagem */}
-                <div>
-                  <Label htmlFor="message" className="text-blue-900">
-                    Mensagem (Opcional)
-                  </Label>
-                  <textarea
-                    id="message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Deixe uma mensagem para o aniversariante..."
-                    className="w-full mt-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows={4}
-                  />
-                </div>
 
                 {/* Botão de Envio */}
                 <Button

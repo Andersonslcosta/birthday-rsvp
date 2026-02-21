@@ -106,6 +106,19 @@ export const clearAllData = async (token: string): Promise<void> => {
   });
 };
 
+export const deleteRSVP = async (token: string, id: string): Promise<void> => {
+  const result = await apiFetch(`/api/admin/rsvp/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao deletar confirmação');
+  }
+};
+
 export const exportToCSV = async (token: string): Promise<Blob> => {
   const response = await fetch(`${API_BASE_URL}/api/admin/export`, {
     headers: {

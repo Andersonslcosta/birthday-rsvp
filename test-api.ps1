@@ -91,7 +91,7 @@ Write-Host "SECTION 1: Health Check" -ForegroundColor Magenta
 Write-Host "[══════════════════════════════════════════]" -ForegroundColor Magenta
 Write-Host ""
 
-$healthResponse = Test-Endpoint `
+Test-Endpoint `
     -Name "GET /health" `
     -Method "GET" `
     -Endpoint "/health" `
@@ -118,7 +118,7 @@ if ($loginResponse -and $loginResponse.token) {
     Write-Host ""
 }
 
-$loginFailResponse = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/admin/login com senha incorreta" `
     -Method "POST" `
     -Endpoint "/api/admin/login" `
@@ -143,7 +143,7 @@ $rsvpConfirmado = @{
     totalPeople = 3
 }
 
-$createResponse1 = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/rsvp - RSVP Confirmado" `
     -Method "POST" `
     -Endpoint "/api/rsvp" `
@@ -158,7 +158,7 @@ $rsvpNaoConfirmado = @{
     totalPeople = 0
 }
 
-$createResponse2 = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/rsvp - RSVP Não Confirmado" `
     -Method "POST" `
     -Endpoint "/api/rsvp" `
@@ -181,7 +181,7 @@ $invalidName = @{
     totalPeople = 1
 }
 
-$validationTest1 = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/rsvp - Nome inválido" `
     -Method "POST" `
     -Endpoint "/api/rsvp" `
@@ -198,7 +198,7 @@ $invalidAge = @{
     totalPeople = 1
 }
 
-$validationTest2 = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/rsvp - Idade inválida" `
     -Method "POST" `
     -Endpoint "/api/rsvp" `
@@ -215,7 +215,7 @@ $mismatchCount = @{
     totalPeople = 2  # não corresponde ao número de participantes
 }
 
-$validationTest3 = Test-Endpoint `
+Test-Endpoint `
     -Name "POST /api/rsvp - Contagem incoerente" `
     -Method "POST" `
     -Endpoint "/api/rsvp" `
@@ -230,7 +230,7 @@ Write-Host "[══════════════════════�
 Write-Host ""
 
 if ($token) {
-    $protectedTest1 = Test-Endpoint `
+    Test-Endpoint `
         -Name "GET /api/rsvp (com token)" `
         -Method "GET" `
         -Endpoint "/api/rsvp" `
@@ -238,7 +238,7 @@ if ($token) {
         -AuthToken $token
     Write-Host ""
 
-    $protectedTest2 = Test-Endpoint `
+    Test-Endpoint `
         -Name "GET /api/statistics (com token)" `
         -Method "GET" `
         -Endpoint "/api/statistics" `
@@ -246,7 +246,7 @@ if ($token) {
         -AuthToken $token
     Write-Host ""
 
-    $protectedTest3 = Test-Endpoint `
+    Test-Endpoint `
         -Name "GET /api/admin/export (com token)" `
         -Method "GET" `
         -Endpoint "/api/admin/export" `
@@ -264,7 +264,7 @@ Write-Host "SECTION 6: Unauthorized Access" -ForegroundColor Magenta
 Write-Host "[══════════════════════════════════════════]" -ForegroundColor Magenta
 Write-Host ""
 
-$unauthorizedTest = Test-Endpoint `
+Test-Endpoint `
     -Name "GET /api/rsvp (sem token)" `
     -Method "GET" `
     -Endpoint "/api/rsvp" `
