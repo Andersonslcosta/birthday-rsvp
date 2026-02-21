@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveRSVP, getAllRSVPs, geStatistics, deleteAllRSVPs } from './database.js';
+import { saveRSVP, getAllRSVPs, geStatistics, deleteAllRSVPs, deleteRSVPById } from './database.js';
 import { authMiddleware } from './auth.js';
 import { generateToken } from './auth.js';
 const router = express.Router();
@@ -253,6 +253,35 @@ router.get('/api/admin/export', authMiddleware, async (req, res) => {
         res.status(500).json({
             success: false,
             error: error.message || 'Erro ao exportar dados',
+        });
+    }
+});
+// DELETE /api/admin/rsvp/:id - Deletar RSVP específico (protegido)
+router.delete('/api/admin/rsvp/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'ID inválido',
+            });
+        }
+        if (id.length > 100) {
+            return res.status(400).json({
+                success: false,
+                error: 'ID inválido',
+            });
+        }
+        await deleteRSVPById(id);
+        res.json({
+            success: true,
+            message: 'Confirmação deletada com sucesso',
+        });
+    }
+    catch (error) {
+        res.status(404).json({
+            success: false,
+            error: error.message || 'RSVP não encontrado',
         });
     }
 });

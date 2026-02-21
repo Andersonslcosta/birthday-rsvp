@@ -145,6 +145,21 @@ export function deleteAllRSVPs() {
         });
     });
 }
+export function deleteRSVPById(id) {
+    return new Promise((resolve, reject) => {
+        db.run('DELETE FROM rsvps WHERE id = ?', [id], function (err) {
+            if (err) {
+                reject(err);
+            }
+            else if (this.changes === 0) {
+                reject(new Error('RSVP não encontrado'));
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
 export function logAdminAction(action, details) {
     return new Promise((resolve, reject) => {
         const timestamp = new Date().toISOString();
