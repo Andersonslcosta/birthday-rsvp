@@ -1,20 +1,11 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Use absolute path for Database - resolve to project root's data directory
-const dbPath = process.env.DATABASE_PATH || path.resolve(__dirname, '../data/birthday.db');
-
-// Ensure data directory exists
-const dataDir = path.dirname(dbPath);
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-  console.log(`[Database] Created directory: ${dataDir}`);
-}
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../data/birthday.db');
 
 export interface Participant {
   name: string;
