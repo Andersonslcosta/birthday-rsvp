@@ -19,7 +19,20 @@ import { validateJWTSecret } from './auth.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+// CORS Origins (production accepts Vercel URLs)
+let CORS_ORIGINS = [];
+if (NODE_ENV === 'production') {
+    // Accept any Vercel URL and localhost for testing
+    CORS_ORIGINS = [
+        /^https:\/\/.*\.vercel\.app$/, // Any Vercel deployment
+        'http://localhost:5173', // Local development
+        'http://localhost:3000', // Alternative local port
+    ];
+}
+else {
+    // Development: accept all origins
+    CORS_ORIGINS = ['*'];
+}
 const MAX_REQUEST_SIZE = process.env.MAX_REQUEST_SIZE || '10kb';
 // Middleware de validação de Content-Type
 app.use((req, res, next) => {
@@ -54,7 +67,7 @@ const loginLimiter = rateLimit({
 app.use(express.json({ limit: MAX_REQUEST_SIZE }));
 app.use(express.urlencoded({ limit: MAX_REQUEST_SIZE, extended: true }));
 app.use(cors({
-    origin: CORS_ORIGIN.split(',').map((o) => o.trim()),
+    origin: CORS_ORIGINS,
     credentials: true,
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -102,7 +115,7 @@ async function startServer() {
 ╠════════════════════════════════════════╣
 ║  Server running on: http://localhost:${PORT}
 ║  Environment: ${NODE_ENV}
-║  CORS Origin: ${CORS_ORIGIN}
+║  CORS: Accepting Vercel & localhost
 ╚════════════════════════════════════════╝
       `);
         });
