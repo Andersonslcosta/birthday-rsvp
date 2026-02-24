@@ -20,10 +20,41 @@ export interface RsvpPayload {
   participants: Participant[];
 }
 
-const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:5000';
+// In development, use relative paths to leverage Vite proxy
+// In production, use the full API URL from environment
+const API_BASE_URL = import.meta.env.DEV
+  ? ''
+  : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
 
+console.log('[API] Development mode:', import.meta.env.DEV);
 console.log('[API] Configured API_BASE_URL:', API_BASE_URL);
 console.log('[API] Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+
+// Fix common mojibake when Latin-1 bytes were decoded as UTF-8 (e.g., JoÃ£o -> João)
+const fixMojibake = (value: string): string => {
+  if (!value) return value;
+  const normalized = value.normalize('NFC');
+  if (!/[ÃÂ]/.test(normalized)) {
+    return normalized;
+  }
+
+  try {
+    const bytes = Uint8Array.from(normalized, (c) => c.charCodeAt(0));
+    const decoded = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+    return decoded.normalize('NFC');
+  } catch {
+    return normalized;
+  }
+};
+
+const normalizeGuest = (guest: Guest): Guest => ({
+  ...guest,
+  responsibleName: fixMojibake(guest.responsibleName),
+  participants: guest.participants.map((participant) => ({
+    ...participant,
+    name: fixMojibake(participant.name),
+  })),
+});
 
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   console.log(`[API] Fetching: ${API_BASE_URL}${endpoint}`, options.method || 'GET');
@@ -77,7 +108,7 @@ export const getGuests = async (token: string): Promise<Guest[]> => {
     },
   });
 
-  return result.data;
+  return result.data.map(normalizeGuest);
 };
 
 export const getStatistics = async (

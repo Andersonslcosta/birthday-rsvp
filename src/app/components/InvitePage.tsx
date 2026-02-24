@@ -382,7 +382,7 @@ export function InvitePage() {
                                 required
                               >
                                 <option value="">Idade</option>
-                                {Array.from({ length: 16 }, (_, i) => (
+                                {Array.from({ length: 12 }, (_, i) => (
                                   <option key={i} value={String(i)}>
                                     {i} anos
                                   </option>
