@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "env": {
+    "VITE_API_URL": "@vite_api_url"
+  },
+  "redirects": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://birthday-rsvp-production.up.railway.app/api/:path*"
+    }
+  ]
+}
