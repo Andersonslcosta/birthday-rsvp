@@ -195,7 +195,7 @@ router.delete('/api/admin/rsvp', authMiddleware, async (req, res) => {
         });
     }
 });
-// GET /api/admin/export - Exportar CSV (protegido)
+// GET /api/admin/export - Exportar CSV com delimitador ; e UTF-8 BOM (protegido)
 router.get('/api/admin/export', authMiddleware, async (req, res) => {
     try {
         const rsvps = await getAllRSVPs();
@@ -206,6 +206,17 @@ router.get('/api/admin/export', authMiddleware, async (req, res) => {
                 error: 'Nenhuma confirmação para exportar',
             });
         }
+        // Função helper para escapar valores CSV
+        const escapeCSV = (value) => {
+            if (value === null || value === undefined)
+                return '';
+            const str = String(value);
+            // Se contém ; " ou quebra de linha, envolver em aspas e dobrar aspas internas
+            if (str.includes(';') || str.includes('"') || str.includes('\n')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
         const headers = [
             'ID',
             'Responsável',
@@ -242,14 +253,16 @@ router.get('/api/admin/export', authMiddleware, async (req, res) => {
                 index === 0 ? new Date(rsvp.timestamp).toLocaleString('pt-BR') : '',
             ]);
         });
-        const csvContent = [
-            headers.join(','),
-            ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-        ].join('\n');
-        console.log(`[Export] Exportando ${rsvps.length} confirmações (${csvContent.length} bytes)`);
+        // Usar ; como delimitador (padrão português/brasileiro)
+        // Adicionar BOM UTF-8 (\ufeff) para Excel interpretar corretamente
+        const csvContent = '\ufeff' + // UTF-8 BOM para Excel
+            [
+                headers.map(h => escapeCSV(h)).join(';'),
+                ...rows.map((row) => row.map((cell) => escapeCSV(cell)).join(';')),
+            ].join('\n');
+        console.log(`[Export] Exportando ${rsvps.length} confirmações com delimitador ; (${csvContent.length} bytes)`);
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="confirmacoes_aniversario_${Date.now()}.csv"`);
-        res.setHeader('Content-Length', Buffer.byteLength(csvContent));
         res.send(csvContent);
     }
     catch (error) {
