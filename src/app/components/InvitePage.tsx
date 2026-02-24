@@ -239,11 +239,13 @@ export function InvitePage() {
                   <div>
                     <p className="font-semibold">Local</p>
                     <p className="text-blue-700">
-                      Salão Gourmet
+                      Salão gourmet - Condomínio Cidade Viva
                       <br />
-                      Av. Industrial 1600, Espaço gourmet, Campestre, Santo André-SP
+                      Av. Industrial 1600, Campestre,
                       <br />
-                      Condomínio Cidade Viva
+                      Santo André-SP
+                      <br />
+                      Cep: 09080-501
                     </p>
                   </div>
                 </div>
