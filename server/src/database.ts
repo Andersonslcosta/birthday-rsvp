@@ -214,6 +214,50 @@ export function deleteRSVPById(id: string): Promise<void> {
   });
 }
 
+export function deleteParticipant(rsvpId: string, participantName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // First, get the current RSVP
+    db.get('SELECT * FROM rsvps WHERE id = ?', [rsvpId], (err, row: any) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (!row) {
+        reject(new Error('RSVP não encontrado'));
+        return;
+      }
+
+      const participants = JSON.parse(row.participants);
+      const filteredParticipants = participants.filter((p: any) => p.name !== participantName);
+
+      // If no participants left, delete the entire RSVP
+      if (filteredParticipants.length === 0) {
+        db.run('DELETE FROM rsvps WHERE id = ?', [rsvpId], function (deleteErr) {
+          if (deleteErr) {
+            reject(deleteErr);
+          } else {
+            resolve();
+          }
+        });
+      } else {
+        // Update with remaining participants
+        const newTotalPeople = filteredParticipants.length;
+        db.run(
+          'UPDATE rsvps SET participants = ?, totalPeople = ? WHERE id = ?',
+          [JSON.stringify(filteredParticipants), newTotalPeople, rsvpId],
+          function (updateErr) {
+            if (updateErr) {
+              reject(updateErr);
+            } else {
+              resolve();
+            }
+          }
+        );
+      }
+    });
+  });
+}
+
 export function logAdminAction(action: string, details?: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const timestamp = new Date().toISOString();

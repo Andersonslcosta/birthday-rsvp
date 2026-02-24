@@ -161,6 +161,20 @@ export const deleteRSVP = async (token: string, id: string): Promise<void> => {
   }
 };
 
+export const deleteParticipant = async (token: string, rsvpId: string, participantName: string): Promise<void> => {
+  const encodedName = encodeURIComponent(participantName);
+  const result = await apiFetch(`/api/admin/rsvp/${rsvpId}/participant/${encodedName}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao deletar participante');
+  }
+};
+
 export const exportToCSV = async (token: string): Promise<Blob> => {
   const response = await fetch(`${API_BASE_URL}/api/admin/export`, {
     headers: {

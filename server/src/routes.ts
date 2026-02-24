@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById } from './database.js';
+import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
 import { generateToken } from './auth.js';
@@ -332,6 +332,40 @@ router.delete('/api/admin/rsvp/:id', authMiddleware, async (req: AuthRequest, re
     res.status(404).json({
       success: false,
       error: error.message || 'RSVP não encontrado',
+    });
+  }
+});
+
+// DELETE /api/admin/rsvp/:id/participant/:name - Deletar participante específico (protegido)
+router.delete('/api/admin/rsvp/:id/participant/:name', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const { id, name } = req.params;
+
+    if (!id || typeof id !== 'string' || !name || typeof name !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Parâmetros inválidos',
+      });
+    }
+
+    if (id.length > 100 || name.length > 200) {
+      return res.status(400).json({
+        success: false,
+        error: 'Parâmetros inválidos',
+      });
+    }
+
+    const decodedName = decodeURIComponent(name);
+    await deleteParticipant(id, decodedName);
+    
+    res.json({
+      success: true,
+      message: 'Participante deletado com sucesso',
+    });
+  } catch (error: any) {
+    res.status(404).json({
+      success: false,
+      error: error.message || 'Participante não encontrado',
     });
   }
 });

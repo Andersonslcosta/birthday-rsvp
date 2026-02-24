@@ -23,7 +23,7 @@ import {
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
-import { getGuests, getStatistics, clearAllData, adminLogin, exportToCSV, deleteRSVP } from '../utils/api';
+import { getGuests, getStatistics, clearAllData, adminLogin, exportToCSV, deleteRSVP, deleteParticipant } from '../utils/api';
 import type { Guest } from '../utils/api';
 
 export function AdminPanel() {
@@ -132,6 +132,20 @@ export function AdminPanel() {
       }
     }
   };
+
+  const handleDeleteParticipant = async (rsvpId: string, participantName: string, responsibleName: string) => {
+    if (window.confirm(`Tem certeza que deseja deletar "${participantName}" da lista de "${responsibleName}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        if (!token) return;
+        await deleteParticipant(token, rsvpId, participantName);
+        await loadData(token);
+        toast.success('Participante deletado com sucesso');
+      } catch (error: any) {
+        toast.error('Erro ao deletar participante: ' + (error.message || 'Tente novamente'));
+      }
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center p-4">
@@ -398,17 +412,16 @@ export function AdminPanel() {
                               {new Date(guest.timestamp).toLocaleString('pt-BR')}
                             </TableCell>
                             <TableCell>
-                              {index === 0 && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => handleDeleteRSVP(guest.id, guest.responsibleName)}
-                                  disabled={isLoading}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteParticipant(guest.id, participant.name, guest.responsibleName)}
+                                disabled={isLoading}
+                                title="Deletar participante"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ));

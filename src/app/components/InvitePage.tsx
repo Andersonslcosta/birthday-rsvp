@@ -631,7 +631,7 @@ export function InvitePage() {
                                 <option value="">Idade</option>
                                 {Array.from({ length: 12 }, (_, i) => (
                                   <option key={i} value={String(i)}>
-                                    {i} anos
+                                    {i} {i === 0 || i === 1 ? 'ano' : 'anos'}
                                   </option>
                                 ))}
                               </select>
