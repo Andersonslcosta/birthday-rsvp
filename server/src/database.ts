@@ -153,7 +153,7 @@ export function getAllRSVPs(): Promise<RSVP[]> {
   });
 }
 
-export function geStatistics(): Promise<Statistics> {
+export function getStatistics(): Promise<Statistics> {
   return new Promise((resolve, reject) => {
     getAllRSVPs()
       .then((rsvps) => {

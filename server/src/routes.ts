@@ -1,5 +1,5 @@
 import express from 'express';
-import { saveRSVP, getAllRSVPs, geStatistics, deleteAllRSVPs, deleteRSVPById } from './database.js';
+import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
 import { generateToken } from './auth.js';
@@ -137,7 +137,7 @@ router.get('/api/rsvp', authMiddleware, async (req: AuthRequest, res) => {
 // GET /api/statistics - Obter estatísticas (protegido)
 router.get('/api/statistics', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const stats = await geStatistics();
+    const stats = await getStatistics();
     res.json({
       success: true,
       data: stats,

@@ -109,7 +109,7 @@ export function getAllRSVPs() {
         });
     });
 }
-export function geStatistics() {
+export function getStatistics() {
     return new Promise((resolve, reject) => {
         getAllRSVPs()
             .then((rsvps) => {
