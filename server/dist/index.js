@@ -17,6 +17,8 @@ import { initDatabase, logAdminAction } from './database.js';
 import routes from './routes.js';
 import { validateJWTSecret } from './auth.js';
 const app = express();
+// Trust proxy for Railway/Vercel deployments
+app.set('trust proxy', 1);
 const PORT = parseInt(process.env.PORT || '5000', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 console.log(`[Server] PORT from environment: ${process.env.PORT}`);
