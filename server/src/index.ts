@@ -21,7 +21,7 @@ import routes from './routes.js';
 import { validateJWTSecret } from './auth.js';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // CORS Origins (production accepts Vercel URLs)
@@ -139,13 +139,13 @@ async function startServer() {
     await initDatabase();
     console.log('✓ Database initialized');
 
-    // Iniciar servidor
-    app.listen(PORT, () => {
+    // Iniciar servidor - listen on all interfaces for Docker/Railway
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`
 ╔════════════════════════════════════════╗
 ║  🎂 Birthday RSVP Server               ║
 ╠════════════════════════════════════════╣
-║  Server running on: http://localhost:${PORT}
+║  Server running on: http://0.0.0.0:${PORT}
 ║  Environment: ${NODE_ENV}
 ║  CORS: Accepting Vercel & localhost
 ╚════════════════════════════════════════╝
