@@ -22,21 +22,32 @@ export interface RsvpPayload {
 
 const API_BASE_URL = (import.meta.env as any).VITE_API_URL || 'http://localhost:5000';
 
+console.log('[API] Configured API_BASE_URL:', API_BASE_URL);
+console.log('[API] Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
+  console.log(`[API] Fetching: ${API_BASE_URL}${endpoint}`, options.method || 'GET');
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
 
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.error || `HTTP ${response.status}`);
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      console.error(`[API] Error ${response.status}:`, data);
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`[API] Fetch failed for ${endpoint}:`, error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export const saveRSVP = async (guest: Omit<Guest, 'id' | 'timestamp'>): Promise<Guest> => {
