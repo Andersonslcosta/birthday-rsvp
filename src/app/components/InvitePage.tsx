@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, MapPin, Calendar, Clock, Plus, Trash2, Sparkles } from 'lucide-react';
+import { Star, MapPin, Calendar, Clock, Plus, Trash2, Sparkles, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -239,13 +239,24 @@ export function InvitePage() {
                   <div>
                     <p className="font-semibold">Local</p>
                     <p className="text-blue-700">
-                      Salão gourmet - Condomínio Cidade Viva
+                      Studio de Eventos Sonhando Pintinhos
                       <br />
-                      Av. Industrial 1600, Campestre,
+                      Rua das Flores Mágicas, 456 - Apto 200, Vila Encantada,
                       <br />
-                      Santo André-SP
+                      São Paulo-SP
                       <br />
-                      Cep: 09080-501
+                      Cep: 04567-890
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <p className="text-sm text-amber-800">
+                      <span className="font-bold italic">
+                        Nota: Necessário preenchimento das informações e confirmação de presença para acesso ao local do evento.
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -253,7 +264,54 @@ export function InvitePage() {
             </CardContent>
           </Card>
 
-          {/* Formulário de Confirmação */}
+          {/* Exemplos de Confirmações */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mb-8"
+          >
+            <Card className="bg-white/90 backdrop-blur-sm border-2 border-blue-100 shadow-lg">
+              <CardContent className="p-6 md:p-8">
+                <h3 className="text-xl md:text-2xl text-blue-900 mb-6 text-center">
+                  📋 Exemplos de Confirmações
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Exemplo 1: Confirmação com um adulto */}
+                  <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-green-800">✅ Maria Silva Oliveira</span>
+                      <span className="text-xs text-green-700 bg-green-200 px-2 py-1 rounded">Confirmado</span>
+                    </div>
+                    <p className="text-sm text-green-700 ml-4">• Maria Silva Oliveira - Adulto</p>
+                    <p className="text-xs text-green-600 mt-2">Confirmado em 20/02/2026 às 10:30</p>
+                  </div>
+
+                  {/* Exemplo 2: Confirmação com adulto e crianças */}
+                  <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-green-800">✅ João Paulo Ferreira</span>
+                      <span className="text-xs text-green-700 bg-green-200 px-2 py-1 rounded">Confirmado</span>
+                    </div>
+                    <p className="text-sm text-green-700 ml-4">• João Paulo Ferreira - Adulto</p>
+                    <p className="text-sm text-green-700 ml-4">• Sofia Ferreira - Criança, 5 anos</p>
+                    <p className="text-sm text-green-700 ml-4">• Enzo Ferreira - Criança, 7 anos</p>
+                    <p className="text-xs text-green-600 mt-2">Confirmado em 22/02/2026 às 14:15</p>
+                  </div>
+
+                  {/* Exemplo 3: Não pode ir */}
+                  <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold text-red-800">❌ Ana Costa</span>
+                      <span className="text-xs text-red-700 bg-red-200 px-2 py-1 rounded">Não confirmado</span>
+                    </div>
+                    <p className="text-xs text-red-600 mt-2">Resposta recebida em 19/02/2026 às 09:00</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
           <Card className="bg-white/90 backdrop-blur-sm border-2 border-blue-200 shadow-xl">
             <CardContent className="p-6 md:p-8">
               <h2 className="text-2xl md:text-3xl text-blue-900 mb-6 text-center">
