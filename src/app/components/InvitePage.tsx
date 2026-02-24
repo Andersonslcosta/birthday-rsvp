@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { saveRSVP } from '../utils/api';
 import type { Participant } from '../utils/api';
 import headerImage from '../../assets/header-image.jpg';
+import littlePrinceImage from '../../assets/newlittleprince.png';
 
 export function InvitePage() {
   const [responsibleName, setResponsibleName] = useState('');
@@ -124,9 +125,242 @@ export function InvitePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-blue-100 to-amber-50 relative overflow-hidden">
-      {/* Estrelas decorativas */}
+      {/* Fundo com efeito de nuvem azul-branco */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-blue-100 via-blue-50 to-transparent opacity-40"></div>
+
+      {/* Elementos decorativos sutis do Pequeno Príncipe */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {/* Nuvens suaves - aumentadas */}
+        <motion.div
+          className="absolute top-10 left-5 text-blue-200 opacity-40"
+          animate={{ x: [0, 20, 0] }}
+          transition={{ duration: 6, repeat: Infinity }}
+          style={{ fontSize: '60px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-20 right-10 text-blue-200 opacity-35"
+          animate={{ x: [0, -15, 0] }}
+          transition={{ duration: 7, repeat: Infinity, delay: 1 }}
+          style={{ fontSize: '50px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-40 left-1/3 text-blue-200 opacity-30"
+          animate={{ x: [0, 25, 0] }}
+          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
+          style={{ fontSize: '45px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-64 right-1/4 text-blue-200 opacity-25"
+          animate={{ x: [0, -20, 0] }}
+          transition={{ duration: 9, repeat: Infinity, delay: 3 }}
+          style={{ fontSize: '40px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-96 left-1/4 text-blue-200 opacity-35"
+          animate={{ x: [0, 18, 0] }}
+          transition={{ duration: 10, repeat: Infinity, delay: 1.5 }}
+          style={{ fontSize: '48px' }}
+        >
+          ☁️
+        </motion.div>
+
+        {/* Mais nuvens na parte superior/meio */}
+        <motion.div
+          className="absolute top-32 right-1/3 text-blue-100 opacity-45"
+          animate={{ x: [0, 15, 0] }}
+          transition={{ duration: 7, repeat: Infinity, delay: 0.5 }}
+          style={{ fontSize: '55px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-48 left-1/2 text-blue-200 opacity-30"
+          animate={{ x: [0, -25, 0] }}
+          transition={{ duration: 11, repeat: Infinity, delay: 2.5 }}
+          style={{ fontSize: '42px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-72 right-1/3 text-blue-100 opacity-35"
+          animate={{ x: [0, 20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, delay: 4 }}
+          style={{ fontSize: '50px' }}
+        >
+          ☁️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-56 right-20 text-blue-200 opacity-25"
+          animate={{ x: [0, -18, 0] }}
+          transition={{ duration: 9.5, repeat: Infinity, delay: 1.8 }}
+          style={{ fontSize: '38px' }}
+        >
+          ☁️
+        </motion.div>
+
+        {/* Rosas em diferentes posições */}
+        <motion.div
+          className="absolute bottom-20 left-8 text-red-300 opacity-25"
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity }}
+          style={{ fontSize: '50px' }}
+        >
+          🌹
+        </motion.div>
+
+        <motion.div
+          className="absolute top-1/2 left-12 text-red-300 opacity-15"
+          animate={{ scale: [1, 1.12, 1] }}
+          transition={{ duration: 6, repeat: Infinity, delay: 1.5 }}
+          style={{ fontSize: '32px' }}
+        >
+          🌹
+        </motion.div>
+
+        {/* Planetas girando */}
+        <motion.div
+          className="absolute top-16 right-20 text-amber-300 opacity-35"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+          style={{ fontSize: '35px' }}
+        >
+          🌍
+        </motion.div>
+
+        <motion.div
+          className="absolute top-2/3 right-1/4 text-amber-300 opacity-25"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          style={{ fontSize: '28px' }}
+        >
+          🌍
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-32 left-1/3 text-amber-300 opacity-20"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'linear', delay: 2 }}
+          style={{ fontSize: '25px' }}
+        >
+          🌍
+        </motion.div>
+
+        {/* Aviões voando */}
+        <motion.div
+          className="absolute top-1/3 right-0 text-blue-300 opacity-30"
+          animate={{ x: [-50, 400], y: [0, -30, 0] }}
+          transition={{ duration: 12, repeat: Infinity }}
+          style={{ fontSize: '35px' }}
+        >
+          ✈️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-2/3 left-0 text-blue-300 opacity-20"
+          animate={{ x: [400, -50], y: [0, 20, 0] }}
+          transition={{ duration: 14, repeat: Infinity, delay: 3 }}
+          style={{ fontSize: '30px' }}
+        >
+          ✈️
+        </motion.div>
+
+        <motion.div
+          className="absolute top-1/4 right-0 text-blue-300 opacity-25"
+          animate={{ x: [-30, 380], y: [0, -25, 0] }}
+          transition={{ duration: 16, repeat: Infinity, delay: 5 }}
+          style={{ fontSize: '28px' }}
+        >
+          ✈️
+        </motion.div>
+
+        {/* Estrelas pulsantes - redistribuídas */}
+        <motion.div
+          className="absolute bottom-10 left-12 text-amber-300 opacity-35"
+          animate={{ scale: [1, 1.25, 1] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          style={{ fontSize: '40px' }}
+        >
+          ⭐
+        </motion.div>
+
+        <motion.div
+          className="absolute top-1/2 right-1/3 text-amber-200 opacity-25"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+          style={{ fontSize: '28px' }}
+        >
+          ⭐
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-48 right-1/4 text-amber-200 opacity-15"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
+          style={{ fontSize: '24px' }}
+        >
+          ⭐
+        </motion.div>
+
+        {/* Cena do Pequeno Príncipe no canto inferior direito */}
+        <motion.div
+          className="absolute bottom-0 right-0 w-80 h-80 md:w-96 md:h-96 pointer-events-none"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            backgroundImage: `url(${littlePrinceImage})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right bottom',
+            backgroundSize: 'contain',
+          }}
+        />
+
+        {/* Brilho mágico */}
+        <motion.div
+          className="absolute bottom-16 left-32 text-amber-300 opacity-25"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+          style={{ fontSize: '32px' }}
+        >
+          💫
+        </motion.div>
+
+        <motion.div
+          className="absolute top-2/3 right-1/2 text-amber-300 opacity-20"
+          animate={{ y: [0, 8, 0], x: [0, 5, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, delay: 1.2 }}
+          style={{ fontSize: '28px' }}
+        >
+          💫
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-1/3 left-1/4 text-amber-300 opacity-15"
+          animate={{ y: [0, 12, 0] }}
+          transition={{ duration: 3.5, repeat: Infinity, delay: 2 }}
+          style={{ fontSize: '26px' }}
+        >
+          💫
+        </motion.div>
+      </div>
+
+      {/* Estrelas decorativas originais - aumentadas */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute text-amber-300 opacity-60"
