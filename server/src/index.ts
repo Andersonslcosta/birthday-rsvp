@@ -24,6 +24,10 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+console.log(`[Server] PORT from environment: ${process.env.PORT}`);
+console.log(`[Server] Parsed PORT: ${PORT}`);
+console.log(`[Server] NODE_ENV: ${NODE_ENV}`);
+
 // CORS Origins (production accepts Vercel URLs)
 let CORS_ORIGINS: (string | RegExp)[] = [];
 if (NODE_ENV === 'production') {
