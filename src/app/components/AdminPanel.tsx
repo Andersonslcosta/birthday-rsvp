@@ -214,7 +214,7 @@ export function AdminPanel() {
                 disabled={isLoading}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
+                Sair
               </Button>
               <Button variant="outline" onClick={handleExportCSV} disabled={isLoading}>
                 <Download className="w-4 h-4 mr-2" />
@@ -434,9 +434,7 @@ export function AdminPanel() {
                 💡 Informações Importantes
               </h3>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Os dados são armazenados localmente no navegador (localStorage)</li>
-                <li>• Para acesso em outro dispositivo, use a função "Exportar CSV"</li>
-                <li>• A senha de acesso é: "Pequenoprincipe2026@"</li>
+                <li>• Os dados não são sensíveis e serão armazenados no banco de dados para fins de confirmação de presença no evento</li>
                 <li>• Limpar dados remove todas as confirmações permanentemente</li>
               </ul>
             </CardContent>

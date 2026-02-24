@@ -222,7 +222,7 @@ export function InvitePage() {
                   <Calendar className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
                   <div>
                     <p className="font-semibold">Data</p>
-                    <p className="text-blue-700">Sábado, 15 de Março de 2025</p>
+                    <p className="text-blue-700">Sábado, 30 de Maio de 2026</p>
                   </div>
                 </div>
 
@@ -230,7 +230,7 @@ export function InvitePage() {
                   <Clock className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
                   <div>
                     <p className="font-semibold">Horário</p>
-                    <p className="text-blue-700">14h00 às 18h00</p>
+                    <p className="text-blue-700">14h às 18h</p>
                   </div>
                 </div>
 
@@ -239,11 +239,11 @@ export function InvitePage() {
                   <div>
                     <p className="font-semibold">Local</p>
                     <p className="text-blue-700">
-                      Salão de Festas Estrela Dourada
+                      Salão Gourmet
                       <br />
-                      Rua das Rosas, 123 - Jardim Primavera
+                      Av. Industrial 1600, Espaço gourmet, Campestre, Santo André-SP
                       <br />
-                      São Paulo - SP
+                      Condomínio Cidade Viva
                     </p>
                   </div>
                 </div>
