@@ -207,6 +207,16 @@ export function AdminPanel() {
                     Dica: senha foi enviada por email
                   </p>
                 </div>
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin/forgot-password')}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    disabled={isLoading}
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Autenticando...' : 'Entrar'}
                 </Button>

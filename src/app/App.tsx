@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/sonner';
 import { InvitePage } from './components/InvitePage';
 import { AdminPanel } from './components/AdminPanel';
+import { ForgotPassword } from './components/ForgotPassword';
+import { ResetPassword } from './components/ResetPassword';
 import { Suspense } from 'react';
 
 function ErrorFallback() {
@@ -28,6 +30,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<InvitePage />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin/reset-password" element={<ResetPassword />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

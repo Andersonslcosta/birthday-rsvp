@@ -200,3 +200,27 @@ export const exportToCSV = async (token: string): Promise<Blob> => {
 
   return response.blob();
 };
+
+// Password Reset APIs
+export const requestPasswordReset = async (email: string): Promise<{ success: boolean; message: string }> => {
+  const result = await apiFetch('/api/admin/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+  return result;
+};
+
+export const validateResetToken = async (token: string): Promise<{ success: boolean; message?: string }> => {
+  const result = await apiFetch(`/api/admin/validate-reset-token/${token}`, {
+    method: 'GET',
+  });
+  return result;
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<{ success: boolean; message: string; newPassword?: string }> => {
+  const result = await apiFetch('/api/admin/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, newPassword }),
+  });
+  return result;
+};
