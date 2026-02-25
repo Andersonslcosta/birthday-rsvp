@@ -227,8 +227,23 @@ export function deleteParticipant(rsvpId: string, participantName: string): Prom
         return;
       }
 
-      const participants = JSON.parse(row.participants);
-      const filteredParticipants = participants.filter((p: any) => p.name !== participantName);
+      if (!row.participantsData) {
+        reject(new Error('Dados de participantes inválidos'));
+        return;
+      }
+
+      let participants;
+      try {
+        participants = JSON.parse(row.participantsData);
+      } catch (parseError) {
+        reject(new Error('Erro ao processar dados de participantes'));
+        return;
+      }
+
+      const normalizedSearchName = participantName.trim().toLowerCase();
+      const filteredParticipants = participants.filter((p: any) => 
+        p.name.trim().toLowerCase() !== normalizedSearchName
+      );
 
       // If no participants left, delete the entire RSVP
       if (filteredParticipants.length === 0) {
@@ -243,7 +258,7 @@ export function deleteParticipant(rsvpId: string, participantName: string): Prom
         // Update with remaining participants
         const newTotalPeople = filteredParticipants.length;
         db.run(
-          'UPDATE rsvps SET participants = ?, totalPeople = ? WHERE id = ?',
+          'UPDATE rsvps SET participantsData = ?, totalPeople = ? WHERE id = ?',
           [JSON.stringify(filteredParticipants), newTotalPeople, rsvpId],
           function (updateErr) {
             if (updateErr) {

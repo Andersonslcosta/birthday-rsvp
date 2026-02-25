@@ -30,6 +30,8 @@ if (NODE_ENV === 'production') {
     // Accept any Vercel URL and localhost for testing
     CORS_ORIGINS = [
         /^https:\/\/.*\.vercel\.app$/, // Any Vercel deployment
+        /^https:\/\/birthday-rsvp.*\.vercel\.app$/, // Specific Vercel deployments
+        'https://birthday-rsvp-five.vercel.app', // Specific deployment
         'http://localhost:5173', // Local development
         'http://localhost:3000', // Alternative local port
     ];
@@ -74,7 +76,17 @@ app.use(express.urlencoded({ limit: MAX_REQUEST_SIZE, extended: true }));
 app.use(cors({
     origin: CORS_ORIGINS,
     credentials: true,
-    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Type'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+}));
+// Handle preflight requests explicitly
+app.options('*', cors({
+    origin: CORS_ORIGINS,
+    credentials: true,
+    methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 // Aplicar rate limiting geral

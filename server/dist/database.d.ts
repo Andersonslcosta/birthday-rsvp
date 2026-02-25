@@ -27,5 +27,6 @@ export declare function getAllRSVPs(): Promise<RSVP[]>;
 export declare function getStatistics(): Promise<Statistics>;
 export declare function deleteAllRSVPs(): Promise<void>;
 export declare function deleteRSVPById(id: string): Promise<void>;
+export declare function deleteParticipant(rsvpId: string, participantName: string): Promise<void>;
 export declare function logAdminAction(action: string, details?: string): Promise<void>;
 //# sourceMappingURL=database.d.ts.map

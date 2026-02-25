@@ -168,6 +168,58 @@ export function deleteRSVPById(id) {
         });
     });
 }
+export function deleteParticipant(rsvpId, participantName) {
+    return new Promise((resolve, reject) => {
+        // First, get the current RSVP
+        db.get('SELECT * FROM rsvps WHERE id = ?', [rsvpId], (err, row) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            if (!row) {
+                reject(new Error('RSVP não encontrado'));
+                return;
+            }
+            if (!row.participantsData) {
+                reject(new Error('Dados de participantes inválidos'));
+                return;
+            }
+            let participants;
+            try {
+                participants = JSON.parse(row.participantsData);
+            }
+            catch (parseError) {
+                reject(new Error('Erro ao processar dados de participantes'));
+                return;
+            }
+            const normalizedSearchName = participantName.trim().toLowerCase();
+            const filteredParticipants = participants.filter((p) => p.name.trim().toLowerCase() !== normalizedSearchName);
+            // If no participants left, delete the entire RSVP
+            if (filteredParticipants.length === 0) {
+                db.run('DELETE FROM rsvps WHERE id = ?', [rsvpId], function (deleteErr) {
+                    if (deleteErr) {
+                        reject(deleteErr);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+            else {
+                // Update with remaining participants
+                const newTotalPeople = filteredParticipants.length;
+                db.run('UPDATE rsvps SET participantsData = ?, totalPeople = ? WHERE id = ?', [JSON.stringify(filteredParticipants), newTotalPeople, rsvpId], function (updateErr) {
+                    if (updateErr) {
+                        reject(updateErr);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+        });
+    });
+}
 export function logAdminAction(action, details) {
     return new Promise((resolve, reject) => {
         const timestamp = new Date().toISOString();

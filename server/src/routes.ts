@@ -356,6 +356,8 @@ router.delete('/api/admin/rsvp/:id/participant/:name', authMiddleware, async (re
     }
 
     const decodedName = decodeURIComponent(name);
+    console.log(`[DELETE Participant] RSVP ID: ${id}, Participant: ${decodedName}`);
+    
     await deleteParticipant(id, decodedName);
     
     res.json({
@@ -363,9 +365,11 @@ router.delete('/api/admin/rsvp/:id/participant/:name', authMiddleware, async (re
       message: 'Participante deletado com sucesso',
     });
   } catch (error: any) {
-    res.status(404).json({
+    console.error('[DELETE Participant] Error:', error);
+    const statusCode = error.message === 'RSVP não encontrado' ? 404 : 500;
+    res.status(statusCode).json({
       success: false,
-      error: error.message || 'Participante não encontrado',
+      error: error.message || 'Erro ao deletar participante',
     });
   }
 });
