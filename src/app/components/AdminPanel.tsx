@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
@@ -46,7 +46,7 @@ export function AdminPanel() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Carregar dados ao iniciar se houver token salvo
-  React.useEffect(() => {
+  useEffect(() => {
     const savedToken = localStorage.getItem('adminToken');
     if (savedToken && !isAuthenticated) {
       setToken(savedToken);
