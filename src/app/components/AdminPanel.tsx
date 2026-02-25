@@ -30,7 +30,10 @@ export function AdminPanel() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    // Recuperar token do localStorage ao carregar componente
+    return localStorage.getItem('adminToken');
+  });
   const [guests, setGuests] = useState<Guest[]>([]);
   const [stats, setStats] = useState({
     totalGuests: 0,
@@ -41,6 +44,21 @@ export function AdminPanel() {
     children: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Carregar dados ao iniciar se houver token salvo
+  React.useEffect(() => {
+    const savedToken = localStorage.getItem('adminToken');
+    if (savedToken && !isAuthenticated) {
+      setToken(savedToken);
+      setIsAuthenticated(true);
+      loadData(savedToken).catch(() => {
+        // Se falhar, limpar token
+        localStorage.removeItem('adminToken');
+        setToken(null);
+        setIsAuthenticated(false);
+      });
+    }
+  }, []);
 
   const loadData = async (authToken: string) => {
     try {
@@ -65,6 +83,8 @@ export function AdminPanel() {
       const result = await adminLogin(password);
       setToken(result.token);
       setIsAuthenticated(true);
+      // Salvar token no localStorage
+      localStorage.setItem('adminToken', result.token);
       await loadData(result.token);
       toast.success('Acesso autorizado!');
     } catch (error: any) {
@@ -85,6 +105,14 @@ export function AdminPanel() {
         toast.error('Erro ao limpar dados: ' + (error.message || 'Tente novamente'));
       }
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    setToken(null);
+    setIsAuthenticated(false);
+    setPassword('');
+    toast.success('Deslogado com sucesso');
   };
 
   const handleExportCSV = async () => {
@@ -219,12 +247,7 @@ export function AdminPanel() {
             <div className="flex gap-2 flex-wrap">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setIsAuthenticated(false);
-                  setPassword('');
-                  setToken(null);
-                  navigate('/');
-                }}
+                onClick={handleLogout}
                 disabled={isLoading}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />

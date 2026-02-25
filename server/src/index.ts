@@ -38,6 +38,8 @@ if (NODE_ENV === 'production') {
   // Accept any Vercel URL and localhost for testing
   CORS_ORIGINS = [
     /^https:\/\/.*\.vercel\.app$/,  // Any Vercel deployment
+    /^https:\/\/birthday-rsvp.*\.vercel\.app$/,  // Specific Vercel deployments
+    'https://birthday-rsvp-five.vercel.app',  // Specific deployment
     'http://localhost:5173',        // Local development
     'http://localhost:3000',        // Alternative local port
   ];
