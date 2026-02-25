@@ -29,4 +29,11 @@ export declare function deleteAllRSVPs(): Promise<void>;
 export declare function deleteRSVPById(id: string): Promise<void>;
 export declare function deleteParticipant(rsvpId: string, participantName: string): Promise<void>;
 export declare function logAdminAction(action: string, details?: string): Promise<void>;
+export declare function createResetToken(email: string, token: string, expiresInMinutes?: number): Promise<void>;
+export declare function validateResetToken(token: string): Promise<{
+    valid: boolean;
+    email?: string;
+}>;
+export declare function markTokenAsUsed(token: string): Promise<void>;
+export declare function cleanupExpiredTokens(): Promise<void>;
 //# sourceMappingURL=database.d.ts.map

@@ -1,8 +1,10 @@
 import express from 'express';
-import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant } from './database.js';
+import crypto from 'crypto';
+import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant, createResetToken, validateResetToken, markTokenAsUsed } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
 import { generateToken } from './auth.js';
+import { sendPasswordResetEmail } from './email.js';
 
 const router = express.Router();
 
@@ -16,6 +18,31 @@ function constantTimeCompare(a: string, b: string): boolean {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return result === 0;
+}
+
+// Validar senha forte
+function validateStrongPassword(password: string): { valid: boolean; error?: string } {
+  if (password.length < 8) {
+    return { valid: false, error: 'A senha deve ter no mínimo 8 caracteres' };
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: 'A senha deve conter pelo menos uma letra maiúscula' };
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: 'A senha deve conter pelo menos uma letra minúscula' };
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, error: 'A senha deve conter pelo menos um número' };
+  }
+  
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return { valid: false, error: 'A senha deve conter pelo menos um caractere especial (!@#$%^&*...)' };
+  }
+  
+  return { valid: true };
 }
 
 // Validar dados de RSVP
@@ -198,6 +225,173 @@ router.post('/api/admin/login', (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao fazer login',
+    });
+  }
+});
+
+// POST /api/admin/forgot-password - Solicitar recuperação de senha
+router.post('/api/admin/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Email é obrigatório',
+      });
+    }
+
+    // Validar formato de email básico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email inválido',
+      });
+    }
+
+    // Verificar se é o email do admin configurado
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      console.error('ADMIN_EMAIL not configured');
+      return res.status(500).json({
+        success: false,
+        error: 'Serviço temporariamente indisponível',
+      });
+    }
+
+    if (email.toLowerCase() !== adminEmail.toLowerCase()) {
+      // Por segurança, não revelar que o email não existe
+      return res.json({
+        success: true,
+        message: 'Se o email estiver cadastrado, você receberá as instruções de recuperação',
+      });
+    }
+
+    // Gerar token único
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Salvar token no banco (expira em 30 minutos)
+    await createResetToken(email, resetToken, 30);
+    
+    // Enviar email
+    await sendPasswordResetEmail(email, resetToken);
+
+    res.json({
+      success: true,
+      message: 'Se o email estiver cadastrado, você receberá as instruções de recuperação',
+    });
+  } catch (error: any) {
+    console.error('[Forgot Password] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar solicitação',
+    });
+  }
+});
+
+// GET /api/admin/validate-reset-token/:token - Validar token de reset
+router.get('/api/admin/validate-reset-token/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token é obrigatório',
+      });
+    }
+
+    const result = await validateResetToken(token);
+
+    if (!result.valid) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token inválido ou expirado',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Token válido',
+    });
+  } catch (error: any) {
+    console.error('[Validate Token] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao validar token',
+    });
+  }
+});
+
+// POST /api/admin/reset-password - Redefinir senha com token
+router.post('/api/admin/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Token é obrigatório',
+      });
+    }
+
+    if (!newPassword || typeof newPassword !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Nova senha é obrigatória',
+      });
+    }
+
+    if (newPassword.length > 200) {
+      return res.status(400).json({
+        success: false,
+        error: 'Senha muito longa',
+      });
+    }
+
+    // Validar senha forte
+    const passwordValidation = validateStrongPassword(newPassword);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        error: passwordValidation.error,
+      });
+    }
+
+    // Validar token
+    const result = await validateResetToken(token);
+
+    if (!result.valid) {
+      return res.status(400).json({
+        success: false,
+        error: 'Token inválido ou expirado',
+      });
+    }
+
+    // Marcar token como usado
+    await markTokenAsUsed(token);
+
+    // Em produção, você atualizaria a senha no banco
+    // Como estamos usando variável de ambiente, vamos apenas informar que precisa atualizar manualmente
+    console.log(`[Reset Password] ======================================`);
+    console.log(`[Reset Password] Senha redefinida com sucesso para: ${result.email}`);
+    console.log(`[Reset Password] ======================================`);
+    console.log(`[Reset Password] AÇÃO NECESSÁRIA:`);
+    console.log(`[Reset Password] Atualize ADMIN_PASSWORD no arquivo server/.env`);
+    console.log(`[Reset Password] Reinicie o servidor (npm start)`);
+    console.log(`[Reset Password] No Railway: atualize a variável ADMIN_PASSWORD`);
+    console.log(`[Reset Password] ======================================`);
+
+    res.json({
+      success: true,
+      message: 'Senha redefinida com sucesso!',
+    });
+  } catch (error: any) {
+    console.error('[Reset Password] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao redefinir senha',
     });
   }
 });

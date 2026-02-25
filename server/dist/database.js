@@ -51,6 +51,18 @@ function createTables() {
         )`, (err) => {
                 if (err)
                     reject(err);
+            });
+            // Tabela de tokens de reset de senha
+            db.run(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          token TEXT UNIQUE NOT NULL,
+          email TEXT NOT NULL,
+          expiresAt TEXT NOT NULL,
+          used INTEGER DEFAULT 0,
+          createdAt TEXT NOT NULL
+        )`, (err) => {
+                if (err)
+                    reject(err);
                 else
                     resolve();
             });
@@ -224,6 +236,68 @@ export function logAdminAction(action, details) {
     return new Promise((resolve, reject) => {
         const timestamp = new Date().toISOString();
         db.run(`INSERT INTO admin_logs (action, timestamp, details) VALUES (?, ?, ?)`, [action, timestamp, details || null], (err) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
+// Password Reset Token Management
+export function createResetToken(email, token, expiresInMinutes = 30) {
+    return new Promise((resolve, reject) => {
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + expiresInMinutes * 60000).toISOString();
+        const createdAt = now.toISOString();
+        db.run(`INSERT INTO password_reset_tokens (token, email, expiresAt, createdAt) VALUES (?, ?, ?, ?)`, [token, email, expiresAt, createdAt], (err) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
+export function validateResetToken(token) {
+    return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM password_reset_tokens WHERE token = ? AND used = 0`, [token], (err, row) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            if (!row) {
+                resolve({ valid: false });
+                return;
+            }
+            const now = new Date();
+            const expiresAt = new Date(row.expiresAt);
+            if (now > expiresAt) {
+                resolve({ valid: false });
+                return;
+            }
+            resolve({ valid: true, email: row.email });
+        });
+    });
+}
+export function markTokenAsUsed(token) {
+    return new Promise((resolve, reject) => {
+        db.run(`UPDATE password_reset_tokens SET used = 1 WHERE token = ?`, [token], (err) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
+export function cleanupExpiredTokens() {
+    return new Promise((resolve, reject) => {
+        const now = new Date().toISOString();
+        db.run(`DELETE FROM password_reset_tokens WHERE expiresAt < ? OR used = 1`, [now], (err) => {
             if (err) {
                 reject(err);
             }
