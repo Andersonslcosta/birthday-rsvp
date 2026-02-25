@@ -3,6 +3,26 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
+/**
+ * BANCO DE DADOS SQLITE
+ * 
+ * Responsável por:
+ * - Gerenciar conexão com banco SQLite (birthday.db)
+ * - RSVP: salvar, recuperar, deletar confirmações de presença
+ * - Tokens: criar, validar, marcar como usado, limpar expirados
+ * - Auditoria: registrar ações do admin
+ * 
+ * Conecta com:
+ * - routes.ts (chama getRSVPs, createRSVP, deleteRSVPById, etc)
+ * - auth.ts (implícitamente - auditoria)
+ * - index.ts (inicializa na startup)
+ * 
+ * Tabelas:
+ * - rsvps: armazena confirmações de presença
+ * - password_reset_tokens: armazena tokens com expiração de 30 min
+ * - admin_actions: registra ações admin (auditoria)
+ */
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -44,6 +64,10 @@ export interface Statistics {
 
 let db: sqlite3.Database;
 
+/**
+ * Inicializa conexão com banco de dados SQLite
+ * Executado em index.ts na startup
+ */
 export function initDatabase(): Promise<void> {
   return new Promise((resolve, reject) => {
     db = new sqlite3.Database(dbPath, (err) => {
@@ -56,6 +80,10 @@ export function initDatabase(): Promise<void> {
   });
 }
 
+/**
+ * Cria tabelas necessárias se não existirem
+ * Executado apenas uma vez (IF NOT EXISTS)
+ */
 function createTables(): Promise<void> {
   return new Promise((resolve, reject) => {
     db.serialize(() => {

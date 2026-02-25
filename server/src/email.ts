@@ -1,7 +1,30 @@
 import { Resend } from 'resend';
 
+/**
+ * INTEGRAÇÃO COM RESEND (EMAIL)
+ * 
+ * Responsável por:
+ * - Conectar com API Resend para envio de emails
+ * - Gerar template HTML de reset de senha
+ * - Enviar email com link de recuperação
+ * 
+ * Conecta com:
+ * - routes.ts (chamado em POST /api/admin/forgot-password)
+ * - Variáveis de ambiente: RESEND_API_KEY, EMAIL_FROM, FRONTEND_URL
+ * 
+ * Segurança (LGPD):
+ * - Não expõe senhas em logs/emails
+ * - Usa token único com expiração
+ * - Resend no modo teste envia apenas para email verificado
+ */
+
 let resend: Resend | null = null;
 
+/**
+ * Inicializa cliente Resend lazy-loaded
+ * Valida RESEND_API_KEY antes de usar
+ * Executado apenas quando necessário (não na startup)
+ */
 function getResendClient(): Resend {
   if (!resend) {
     const apiKey = process.env.RESEND_API_KEY;
@@ -13,6 +36,15 @@ function getResendClient(): Resend {
   return resend;
 }
 
+/**
+ * Envia email de reset de senha via Resend
+ * 
+ * @param email - Email do admin configurado
+ * @param resetToken - Token único de reset (válido por 30 min)
+ * 
+ * Chamado por: routes.ts → POST /api/admin/forgot-password
+ * Usado por: Frontend → button "Esqueci minha senha"
+ */
 export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<void> {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/reset-password?token=${resetToken}`;
   

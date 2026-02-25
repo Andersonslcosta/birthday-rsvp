@@ -1,3 +1,23 @@
+/**
+ * CAMADA DE API (FRONTEND ↔ BACKEND)
+ * 
+ * Responsável por:
+ * - Centralizar todas as requisições HTTP
+ * - Gerenciar autenticação (JWT em header)
+ * - Handling de erros padronizado
+ * - Logging de requisições
+ * 
+ * Conecta com:
+ * - AdminPanel.tsx (getGuests, deleteRSVP, etc)
+ * - InvitePage.tsx (createRSVP)
+ * - ForgotPassword.tsx (requestPasswordReset)
+ * - ResetPassword.tsx (validateResetToken, resetPassword)
+ * - storage.ts (recupera JWT para Authorization header)
+ * 
+ * Backend:
+ * - Todas as rotas em server/src/routes.ts
+ */
+
 export interface Participant {
   name: string;
   age: number | null;
