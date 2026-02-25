@@ -9,7 +9,7 @@ services:
       - NODE_ENV=production
       - PORT=5000
       - DATABASE_PATH=/app/data/birthday.db
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-pequenopríncipe2025}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-SuaSenhaForte123!}
       - JWT_SECRET=${JWT_SECRET:-seu-secret-jwt-super-seguro}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5000}
     volumes:

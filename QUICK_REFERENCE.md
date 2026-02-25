@@ -73,7 +73,7 @@ git push origin main
 
 | Item | Value | Location |
 |------|-------|----------|
-| Admin Password | `pequenoprincipe2025` | `server/.env` |
+| Admin Password | Configurada em `.env` | `server/.env` |
 | JWT Secret | `[auto-generated]` | `server/.env` |
 | CORS Origin | `http://localhost:5173` | `server/.env` |
 | Frontend Port | `5173` | Default |

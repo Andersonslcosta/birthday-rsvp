@@ -74,7 +74,7 @@ Backend (`server/.env`):
 NODE_ENV=development
 PORT=5000
 DATABASE_PATH=./data/birthday.db
-ADMIN_PASSWORD=pequenopríncipe2025
+ADMIN_PASSWORD=SuaSenhaForte123!
 JWT_SECRET=seu-secret-jwt-super-seguro
 CORS_ORIGIN=http://localhost:5174,http://localhost:5173
 ```
@@ -172,7 +172,7 @@ Fazer login administrativo.
 Request:
 ```json
 {
-  "password": "pequenopríncipe2025"
+  "password": "SuaSenhaForte123!"
 }
 ```
 

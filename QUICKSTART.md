@@ -35,7 +35,7 @@ npm run dev
 ### 4️⃣ Acessar
 - Frontend: http://localhost:5174 (ou 5173)
 - Admin: http://localhost:5174/admin
-  - Senha: `pequenopríncipe2025`
+  - Senha: Use a senha configurada em `server/.env` (variável `ADMIN_PASSWORD`)
 
 ---
 

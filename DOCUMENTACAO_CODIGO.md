@@ -418,7 +418,7 @@ npm run dev    # Inicia Vite (porta 5173)
 
 **Login:**
 - Acesse http://localhost:5173/admin
-- Senha padrão (ver .env): `Pequenoprincipe2026@`
+- Senha: Configurada em `server/.env` variável `ADMIN_PASSWORD`
 
 **RSVP:**
 - Acesse http://localhost:5173

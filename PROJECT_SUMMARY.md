@@ -149,7 +149,7 @@ cd server && npm run dev
 # 4. Access
 - Guest form: http://localhost:5173
 - Admin: http://localhost:5173/admin
-- Password: pequenoprincipe2025
+- Password: Configurada em `server/.env`
 ```
 
 ---

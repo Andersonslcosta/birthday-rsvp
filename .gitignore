@@ -28,6 +28,16 @@ out/
 *.sqlite3
 birthday.db
 
+# Test scripts (contêm senhas/dados sensíveis)
+test-*.ps1
+test-*.sh
+setup-*.ps1
+setup.sh
+test.sh
+security-audit.ps1
+# scripts de teste locais
+*.test.ts
+*.test.js
 # IDE
 .vscode/
 .idea/
