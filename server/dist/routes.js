@@ -247,6 +247,13 @@ router.post('/api/admin/forgot-password', async (req, res) => {
     }
     catch (error) {
         console.error('[Forgot Password] Error:', error);
+        // Verificar se é erro de configuração
+        if (error.message && error.message.includes('RESEND_API_KEY')) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço de email não configurado. Entre em contato com o administrador.',
+            });
+        }
         res.status(500).json({
             success: false,
             error: 'Erro ao processar solicitação',
