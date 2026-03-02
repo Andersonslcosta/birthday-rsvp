@@ -85,11 +85,11 @@ const loginLimiter = rateLimit({
 });
 
 // Middleware
-app.use(csrfProtection); // Proteção CSRF
 app.use(express.json({ limit: MAX_REQUEST_SIZE }));
 app.use(express.urlencoded({ limit: MAX_REQUEST_SIZE, extended: true }));
 app.use(cookieParser()); // Para ler refresh tokens dos cookies
 
+// CORS ANTES de CSRF e rate limiting (para permitir preflight requests)
 app.use(
   cors({
     origin: CORS_ORIGINS,
@@ -109,6 +109,9 @@ app.options('*', cors({
   methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Agora sim: CSRF APÓS CORS
+app.use(csrfProtection);
 
 // Aplicar rate limiting geral
 app.use(generalLimiter);
