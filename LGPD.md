@@ -252,9 +252,9 @@ Disponibilizar este contato na página inicial ou footer.
 **Local:** Embaixo/acima do botão "Confirmar Presença"
 
 **Texto:** 
-> Ao confirmar sua presença, You atesta que as informações fornecidas são verdadeiras 
+> Ao confirmar sua presença, você atesta que as informações fornecidas são verdadeiras 
 > e consente com o uso de seus dados exclusivamente para fins de organização e logística 
-> do evento. Seus dados serão automaticamente deletados em **30 de junho de 2026**.
+> do evento.
 
 ---
 

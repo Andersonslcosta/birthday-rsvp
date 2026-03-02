@@ -659,6 +659,14 @@ export function InvitePage() {
                   </div>
                 )}
 
+                {/* Consentimento LGPD */}
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                  <p className="text-sm text-blue-900 leading-relaxed">
+                    <span className="font-semibold">Consentimento:</span> Ao confirmar sua presença, você atesta que as informações fornecidas são verdadeiras 
+                    e consente com o uso de seus dados exclusivamente para fins de organização e logística do evento.
+                  </p>
+                </div>
+
                 {/* Botão de Envio */}
                 <Button
                   type="submit"
