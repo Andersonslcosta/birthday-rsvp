@@ -33,20 +33,35 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction) 
     if (isDev && isLocalhost) {
       // Em dev com localhost, aceitar
       isValidOrigin = true;
+    } else if (isDev) {
+      // Em dev, aceitar qualquer origem
+      isValidOrigin = true;
     } else if (origin) {
-      // Comparar origin header (mais seguro que referer)
+      // Em produção, validar origin contra lista de domínios permitidos
       const allowedOrigins = [
-        `https://${host}`,
-        `http://${host}`,
+        'https://birthday-rsvp-five.vercel.app',           // Vercel production
+        'https://birthday-rsvp.vercel.app',                // Alternative Vercel
+        /^https:\/\/.*\.vercel\.app$/,                     // Any Vercel URL
       ];
-      isValidOrigin = allowedOrigins.some(o => origin === o);
+      
+      isValidOrigin = allowedOrigins.some(o => {
+        if (o instanceof RegExp) {
+          return o.test(origin);
+        }
+        return origin === o;
+      });
+      
+      // Fallback: se o host está no origin, também é válido (same origin)
+      if (!isValidOrigin && origin.includes(host)) {
+        isValidOrigin = true;
+      }
     } else if (referer) {
       // Fallback para referer (menos seguro)
-      isValidOrigin = referer.includes(host);
+      isValidOrigin = referer.includes('vercel.app') || referer.includes(host);
     }
 
-    if (!isValidOrigin && !isDev) {
-      console.warn(`[CSRF] Rejected request from referer: ${referer}, origin: ${origin}`);
+    if (!isValidOrigin) {
+      console.warn(`[CSRF] Rejected request from origin: ${origin}, referer: ${referer}, host: ${host}`);
       return res.status(403).json({
         success: false,
         error: 'CSRF validation failed',
