@@ -3,7 +3,8 @@
  * 
  * Responsável por:
  * - Centralizar todas as requisições HTTP
- * - Gerenciar autenticação (JWT em header)
+ * - Gerenciar autenticação (Access Token + Refresh Token)
+ * - Auto-refresh de token quando expire
  * - Handling de erros padronizado
  * - Logging de requisições
  * 
@@ -12,11 +13,13 @@
  * - InvitePage.tsx (createRSVP)
  * - ForgotPassword.tsx (requestPasswordReset)
  * - ResetPassword.tsx (validateResetToken, resetPassword)
- * - storage.ts (recupera JWT para Authorization header)
+ * - storage.ts (gerencia access tokens em sessionStorage)
  * 
  * Backend:
  * - Todas as rotas em server/src/routes.ts
  */
+
+import { saveAccessToken, getAccessToken, clearTokens, shouldRefreshToken } from './storage.js';
 
 export interface Participant {
   name: string;
@@ -80,13 +83,41 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
   console.log(`[API] Fetching: ${API_BASE_URL}${endpoint}`, options.method || 'GET');
   
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    let response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      credentials: 'include', // Enviar cookies (refresh token)
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
       ...options,
     });
+
+    // Se 401 e temos access token, tentar fazer refresh
+    if (response.status === 401 && getAccessToken()) {
+      console.log('[API] Token expirou, tentando refresh...');
+      
+      try {
+        await refreshAccessTokenRequest();
+        
+        // Tentar novamente com novo token
+        const newToken = getAccessToken();
+        if (newToken) {
+          response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${newToken}`,
+              ...options.headers,
+            },
+            ...options,
+          });
+        }
+      } catch (refreshError) {
+        console.error('[API] Refresh falhou:', refreshError);
+        clearTokens();
+        throw new Error('Sessão expirada. Por favor, faça login novamente.');
+      }
+    }
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
@@ -99,6 +130,32 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
     console.error(`[API] Fetch failed for ${endpoint}:`, error);
     throw error;
   }
+}
+
+/**
+ * Refresh access token usando refresh token (em HTTP-only cookie)
+ */
+async function refreshAccessTokenRequest(): Promise<string> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/refresh`, {
+    method: 'POST',
+    credentials: 'include', // Incluir refresh token cookie
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha ao renovar token');
+  }
+
+  const data = await response.json();
+  
+  if (data.token) {
+    saveAccessToken(data.token, data.expiresIn || 900);
+    return data.token;
+  }
+
+  throw new Error('Nenhum token retornado');
 }
 
 export const saveRSVP = async (guest: Omit<Guest, 'id' | 'timestamp'>): Promise<Guest> => {
@@ -153,10 +210,36 @@ export const getStatistics = async (
 export const adminLogin = async (password: string): Promise<{ token: string }> => {
   const result = await apiFetch('/api/admin/login', {
     method: 'POST',
+    credentials: 'include', // Para receber refresh token em cookie
     body: JSON.stringify({ password }),
   });
 
+  // Salvar access token com tempo de expiração
+  if (result.token && result.expiresIn) {
+    saveAccessToken(result.token, result.expiresIn);
+  }
+
   return { token: result.token };
+};
+
+/**
+ * Logout - revoga tokens no servidor
+ */
+export const adminLogout = async (token: string): Promise<void> => {
+  try {
+    await apiFetch('/api/admin/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    console.warn('[API] Erro ao fazer logout no servidor:', error);
+  } finally {
+    // Sempre limpar tokens localmente
+    clearTokens();
+  }
 };
 
 export const clearAllData = async (token: string): Promise<void> => {

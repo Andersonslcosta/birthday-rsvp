@@ -15,8 +15,10 @@ dotenv.config({ path: envPath });
 // Then import other modules that depend on env vars
 // @ts-ignore - cors module with type issues
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { initDatabase, logAdminAction } from './database.js';
+import { csrfProtection } from './csrf.js';
 import routes from './routes.js';
 import { validateJWTSecret } from './auth.js';
 
@@ -83,8 +85,10 @@ const loginLimiter = rateLimit({
 });
 
 // Middleware
+app.use(csrfProtection); // Proteção CSRF
 app.use(express.json({ limit: MAX_REQUEST_SIZE }));
 app.use(express.urlencoded({ limit: MAX_REQUEST_SIZE, extended: true }));
+app.use(cookieParser()); // Para ler refresh tokens dos cookies
 
 app.use(
   cors({
@@ -108,9 +112,6 @@ app.options('*', cors({
 
 // Aplicar rate limiting geral
 app.use(generalLimiter);
-
-// Aplicar rate limiting específico para login antes de registrar rotas
-app.use('/api/admin/login', loginLimiter);
 
 // Rotas
 app.use(routes);

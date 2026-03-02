@@ -1,12 +1,25 @@
 import express from 'express';
 import crypto from 'crypto';
-import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant, createResetToken, validateResetToken, markTokenAsUsed } from './database.js';
+import rateLimit from 'express-rate-limit';
+import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant, createResetToken, validateResetToken, markTokenAsUsed, logAdminAction } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
-import { generateToken } from './auth.js';
+import { generateTokenPair, refreshAccessToken, blacklistToken, verifyAccessToken } from './tokenManager.js';
 import { sendPasswordResetEmail } from './email.js';
 
 const router = express.Router();
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Rate limiter específico para login
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 tentativas de login
+  message: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => NODE_ENV === 'development',
+  keyGenerator: (req) => req.ip || 'unknown',
+});
 
 // Constant-time comparison para evitar timing attacks
 function constantTimeCompare(a: string, b: string): boolean {
@@ -178,7 +191,7 @@ router.get('/api/statistics', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // POST /api/admin/login - Login administrativo
-router.post('/api/admin/login', (req, res) => {
+router.post('/api/admin/login', loginLimiter, (req, res) => {
   try {
     const { password } = req.body;
 
@@ -214,17 +227,84 @@ router.post('/api/admin/login', (req, res) => {
       });
     }
 
-    const token = generateToken();
+    // Gerar par de tokens (access 15min + refresh 7d)
+    const { accessToken, refreshToken } = generateTokenPair();
+
+    // Retornar access token e refresh token em HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+    });
 
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
-      token,
+      token: accessToken, // Frontend usa isto para Authorization header
+      expiresIn: 900, // 15 minutos em segundos
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
       error: error.message || 'Erro ao fazer login',
+    });
+  }
+});
+
+// POST /api/admin/refresh - Renovar access token usando refresh token
+router.post('/api/admin/refresh', (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        error: 'Refresh token não encontrado',
+      });
+    }
+
+    // Gerar novo access token
+    const newAccessToken = refreshAccessToken(refreshToken);
+
+    res.json({
+      success: true,
+      token: newAccessToken,
+      expiresIn: 900, // 15 minutos em segundos
+    });
+  } catch (error: any) {
+    res.status(401).json({
+      success: false,
+      error: error.message || 'Falha ao renovar token',
+    });
+  }
+});
+
+// POST /api/admin/logout - Logout (revoga tokens)
+router.post('/api/admin/logout', authMiddleware, (req: AuthRequest, res) => {
+  try {
+    // Recuperar token do header para blacklist
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      blacklistToken(token);
+    }
+
+    // Limpar refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    res.json({
+      success: true,
+      message: 'Logout realizado com sucesso',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erro ao fazer logout',
     });
   }
 });
@@ -434,15 +514,27 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
       });
     }
 
-    // Função helper para escapar valores CSV
+    // Função helper para escapar valores CSV e prevenir CSV injection
+    // CSV Injection: fórmulas que começam com =, +, -, @ ou Tab
     const escapeCSV = (value: string | number | null): string => {
       if (value === null || value === undefined) return '';
-      const str = String(value);
-      // Se contém ; " ou quebra de linha, envolver em aspas e dobrar aspas internas
-      if (str.includes(';') || str.includes('"') || str.includes('\n')) {
-        return `"${str.replace(/"/g, '""')}"`;
+      const str = String(value).trim();
+      
+      // Detectar e prevenir CSV injection (fórmulas Excel/Calc)
+      const injectionChars = ['=', '+', '-', '@', '\t'];
+      let escaped = str;
+      
+      if (injectionChars.some(char => escaped.startsWith(char))) {
+        // Prefixar com apóstrofo para neutralizar fórmula
+        escaped = `'${escaped}`;
       }
-      return str;
+      
+      // Se contém ; " ou quebra de linha, envolver em aspas e dobrar aspas internas
+      if (escaped.includes(';') || escaped.includes('"') || escaped.includes('\n')) {
+        return `"${escaped.replace(/"/g, '""')}"`;
+      }
+      
+      return escaped;
     };
 
     const headers = [
