@@ -261,6 +261,9 @@ Isso valida:
 - ✅ **LGPD Ready** - Direito ao esquecimento, consentimento, retenção controlada
 - ✅ **Audit Logging** - Admin logs para rastreabilidade
 - ✅ **Dados Sensíveis** - Variáveis em `.env` (fora do git)
+- ✅ **Consentimento Explícito** - Frase de consentimento antes de confirmar presença
+- ✅ **Deleção Automática** - Dados deletados em 30/06/2026 (LGPD)
+- ✅ **Consentimento Explícito** - Frase de consentimento antes de confirmar presença
 
 ### Boas Práticas
 - 🔐 **Nunca** commite o arquivo `.env`

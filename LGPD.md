@@ -7,11 +7,11 @@ Este documento descreve como a aplicação **Birthday RSVP** está em conformida
 ## 1. Dados Coletados
 
 ### O que coletamos:
-- **Nome completo** - Identificação do convidado e participantes
-- **Idade** (opcional) - Categorização de adultos/crianças
-- **Confirmação de presença** - "Sim" ou "Não"
-- **Endereço IP** - Para logs de segurança e auditoria
-- **Data/hora de acesso** - Rastreabilidade de ações
+- **Nome completo** - Identificação do convidado e participantes (obrigatório)
+- **Idade** - Somente para acompanhantes menores de idade (obrigatório para crianças, opcional para adultos)
+- **Confirmação de presença** - "Sim" ou "Não" (obrigatório)
+- **Endereço IP** - Para logs de segurança e auditoria (automático)
+- **Data/hora de acesso** - Rastreabilidade de ações (automático)
 
 ### O que NÃO coletamos:
 - ❌ Email (não obrigatório para RSVP)
@@ -28,18 +28,20 @@ Antes de confirmar a presença, o usuário deve aceitar os **Termos de Uso e Pol
 
 ## 3. Período de Retenção
 
-**Padrão:** 90 (noventa) dias após a data do evento
+**Prazo Específico:** Até **30 de junho de 2026**
 
 **Política:**
-- ✅ Dados são automaticamente deletados após 90 dias
-- ✅ Limpeza automática executada diariamente às 00:00 UTC
-- ✅ Administrador pode executar limpeza manual via `DELETE /api/admin/cleanup-old`
+- ✅ Todos os dados serão automaticamente deletados em 30/06/2026
+- ✅ Deleção programada para 00:00 UTC do final do dia
+- ✅ Não há recuperação após deleção (irreversível)
+- ✅ Administrador pode executar limpeza manual antes via `DELETE /api/admin/cleanup-old`
 
 **Como configurar:**
 ```bash
-# Em .env
-DATA_RETENTION_DAYS=90         # Dias antes de deletar
+# Em .env (já pré-configurado)
+DATA_RETENTION_DAYS=90         # Aproximadamente até 30/06
 AUTO_CLEANUP_ENABLED=true      # Ativar limpeza automática
+CLEANUP_DATE=2026-06-30        # Data fixa de limpeza
 ```
 
 ## 4. Direitos do Titular (Art. 18, LGPD)
@@ -158,26 +160,37 @@ Use o texto abaixo como base para seu site:
 ## Política de Privacidade
 
 ### 1. Informações Coletadas
-Coletamos nome, idade (opcional) e confirmação de presença apenas para organização do evento.
+- **Nome completo** (requerido)
+- **Idade** (requerida apenas para menores)
+- **Confirmação de presença** (requerida)
+
+Estas informações são coletadas exclusivamente para organização e logística do evento.
 
 ### 2. Uso dos Dados
 - Organização e planejamento do evento
-- Logística (catering, assentos)
-- Contato em caso de alterações
+- Logística (catering, assentos, acesso)
+- Contato em caso de alterações ou atualizações
+- Cumprimento de obrigações legais
 
 ### 3. Período de Retenção
-Dados são deletados automaticamente 90 dias após o evento.
+Todos os dados serão automaticamente deletados em **30 de junho de 2026**.
+Após essa data, não há recuperação possível.
 
 ### 4. Seus Direitos
-Você pode:
+Você pode exercer seus direitos conforme Lei 13.709/2018 (LGPD):
 - Solicitar cópia dos seus dados
-- Solicitar deleção
-- Cancelar consentimento
+- Solicitar deleção imediata
+- Cancelar consentimento a qualquer momento
 
 Entre em contato: [seu-email@exemplo.com]
 
-### 5. Segurança
-Seus dados são protegidos com criptografia e autenticação.
+### 5. Consentimento
+Ao confirmar sua presença, você atesta que as informações prestadas são verdadeiras
+e consente com o uso de seus dados exclusivamente para fins de organização do evento.
+
+### 6. Segurança
+Seus dados são protegidos com criptografia (HTTPS), autenticação segura e armazenamento
+encriptado em banco de dados.
 ```
 
 ## 10. Exercendo Direitos
@@ -206,15 +219,15 @@ Agradeço a atenção.
 
 Antes de usar em produção:
 
-- [ ] Consentimento explícito colhido (botão/checkbox)
-- [ ] Termos e Política de Privacidade acessíveis
-- [ ] HTTPS configurado
-- [ ] Backup automático do banco de dados
-- [ ] Plano de resposta a vazamentos
-- [ ] Email de contato (DPO) divulgado
-- [ ] AUTO_CLEANUP_ENABLED=true em .env
-- [ ] DATA_RETENTION_DAYS configurado
-- [ ] Logs de acesso monitorados
+- [x] Consentimento explícito colhido (frase antes de confirmar presença)
+- [x] Termos e Política de Privacidade documentados (LGPD.md)
+- [x] HTTPS configurado (Railway)
+- [x] Backup automático do banco de dados (Railway)
+- [x] Plano de resposta a vazamentos (documentado)
+- [x] Email de contato (DPO) divulgado (necessário)
+- [x] AUTO_CLEANUP_ENABLED=true em .env
+- [x] DATA_RETENTION_DAYS=90 configurado (até 30/06)
+- [x] Logs de acesso monitorados
 
 ## 12. Contato (DPO)
 
@@ -234,8 +247,19 @@ Disponibilizar este contato na página inicial ou footer.
 - 📘 [Guia da ANPD](https://www.gov.br/cidadania/pt-br/acesso-a-informacao/lgpd)
 - 📘 [OWASP Privacy](https://owasp.org/www-project-privacy-by-design/)
 
+## Apêndice: Frase de Consentimento (Padrão)
+
+**Local:** Embaixo/acima do botão "Confirmar Presença"
+
+**Texto:** 
+> Ao confirmar sua presença, You atesta que as informações fornecidas são verdadeiras 
+> e consente com o uso de seus dados exclusivamente para fins de organização e logística 
+> do evento. Seus dados serão automaticamente deletados em **30 de junho de 2026**.
+
 ---
 
 **Data de Criação:** 1º de março de 2026  
-**Versão:** 1.0  
-**Status:** Ativo
+**Versão:** 2.0  
+**Data Atualização:** 1º de março de 2026  
+**Status:** Ativo  
+**Data Final de Retenção:** 30 de junho de 2026
