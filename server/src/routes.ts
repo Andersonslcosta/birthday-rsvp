@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
-import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant, createResetToken, validateResetToken, markTokenAsUsed, logAdminAction } from './database.js';
+import { saveRSVP, getAllRSVPs, getStatistics, deleteAllRSVPs, deleteRSVPById, deleteParticipant, createResetToken, validateResetToken, markTokenAsUsed, logAdminAction, cleanupOldRSVPs } from './database.js';
 import { authMiddleware } from './auth.js';
 import type { AuthRequest } from './auth.js';
 import { generateTokenPair, refreshAccessToken, blacklistToken, verifyAccessToken } from './tokenManager.js';
@@ -238,6 +238,11 @@ router.post('/api/admin/login', loginLimiter, (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
     });
 
+    // Log successful login (async, don't block response)
+    logAdminAction('admin_login', `IP: ${req.ip || 'unknown'}`).catch((err) => {
+      console.error('[Logging] Failed to log admin login:', err);
+    });
+
     res.json({
       success: true,
       message: 'Login realizado com sucesso',
@@ -295,6 +300,11 @@ router.post('/api/admin/logout', authMiddleware, (req: AuthRequest, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
+    });
+
+    // Log logout (async, don't block response)
+    logAdminAction('admin_logout', `IP: ${req.ip || 'unknown'}`).catch((err) => {
+      console.error('[Logging] Failed to log admin logout:', err);
     });
 
     res.json({
@@ -586,6 +596,11 @@ router.get('/api/admin/export', authMiddleware, async (req: AuthRequest, res) =>
 
     console.log(`[Export] Exportando ${rsvps.length} confirmações com delimitador ; (${csvContent.length} bytes)`);
 
+    // Log export action (async, don't block response)
+    logAdminAction('export_csv', `${rsvps.length} registros exportados (${csvContent.length} bytes)`).catch((err) => {
+      console.error('[Logging] Failed to log export:', err);
+    });
+
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="confirmacoes_aniversario_${Date.now()}.csv"`);
     res.send(csvContent);
@@ -665,6 +680,26 @@ router.delete('/api/admin/rsvp/:id/participant/:name', authMiddleware, async (re
     res.status(statusCode).json({
       success: false,
       error: error.message || 'Erro ao deletar participante',
+    });
+  }
+});
+
+// DELETE /api/admin/cleanup-old - Deletar RSVPs com > 90 dias (LGPD) (protegido)
+router.delete('/api/admin/cleanup-old', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const retentionDays = parseInt(process.env.DATA_RETENTION_DAYS || '90', 10);
+    const result = await cleanupOldRSVPs(retentionDays);
+    
+    res.json({
+      success: true,
+      message: `Limpeza LGPD concluída: ${result.deletedCount} registros deletados`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error: any) {
+    console.error('[Cleanup Old RSVPs] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Erro ao executar limpeza de dados antigos',
     });
   }
 });

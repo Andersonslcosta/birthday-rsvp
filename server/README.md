@@ -47,12 +47,19 @@ npm start
 - `POST /api/rsvp` - Salvar confirmação
 - `POST /api/admin/login` - Login administrativo
 
-### Protected (requer JWT token)
+### Protected (requer JWT access token)
 
 - `GET /api/rsvp` - Listar todas as confirmações
 - `GET /api/statistics` - Obter estatísticas
-- `GET /api/admin/export` - Exportar CSV
+- `GET /api/admin/export` - Exportar CSV (com injection prevention)
 - `DELETE /api/admin/rsvp` - Deletar todos os dados
+- `DELETE /api/admin/rsvp/:id` - Deletar confirmação específica
+- `POST /api/admin/refresh` - Renovar access token usando refresh token
+- `POST /api/admin/logout` - Logout (revoga token)
+
+### Limpeza de Dados (LGPD)
+
+- `DELETE /api/admin/cleanup-old` - Deletar registros com > 90 dias (automático diariamente)
 
 ## Estrutura de Dados
 

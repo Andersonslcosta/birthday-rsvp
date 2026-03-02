@@ -17,7 +17,7 @@ dotenv.config({ path: envPath });
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
-import { initDatabase, logAdminAction } from './database.js';
+import { initDatabase, logAdminAction, cleanupOldRSVPs } from './database.js';
 import { csrfProtection } from './csrf.js';
 import routes from './routes.js';
 import { validateJWTSecret } from './auth.js';
@@ -160,6 +160,22 @@ async function startServer() {
     // Inicializar banco de dados
     await initDatabase();
     console.log('✓ Database initialized');
+
+    // Setup LGPD automatic cleanup (24 hours)
+    const autoCleanupEnabled = process.env.AUTO_CLEANUP_ENABLED !== 'false';
+    if (autoCleanupEnabled) {
+      const retentionDays = parseInt(process.env.DATA_RETENTION_DAYS || '90', 10);
+      // Run cleanup every 24 hours (86400000 ms)
+      setInterval(async () => {
+        try {
+          const result = await cleanupOldRSVPs(retentionDays);
+          console.log(`[LGPD] Auto-cleanup executed: deleted ${result.deletedCount} old records`);
+        } catch (error) {
+          console.error('[LGPD] Auto-cleanup failed:', error);
+        }
+      }, 24 * 60 * 60 * 1000);
+      console.log(`✓ LGPD auto-cleanup enabled (${retentionDays} day retention)`);
+    }
 
     // Iniciar servidor - listen on all interfaces for Docker/Railway
     app.listen(PORT, '0.0.0.0', () => {

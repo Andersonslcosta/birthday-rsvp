@@ -316,6 +316,34 @@ export function deleteParticipant(rsvpId: string, participantName: string): Prom
   });
 }
 
+// LGPD: Deletar RSVPs com mais de X dias (default 90)
+export function cleanupOldRSVPs(retentionDays: number = 90): Promise<{ deletedCount: number }> {
+  return new Promise((resolve, reject) => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    const cutoffTimestamp = cutoffDate.getTime();
+
+    db.run(
+      'DELETE FROM rsvps WHERE createdAt < ?',
+      [cutoffTimestamp],
+      function (err) {
+        if (err) {
+          console.error('[DB] Erro ao limpar RSVPs antigos:', err);
+          reject(err);
+        } else {
+          const deletedCount = this.changes || 0;
+          console.log(`[LGPD] Deletados ${deletedCount} RSVPs com mais de ${retentionDays} dias`);
+          
+          // Log this admin action
+          logAdminAction('cleanup_old_rsvps', `Deletados ${deletedCount} registros com > ${retentionDays} dias`)
+            .then(() => resolve({ deletedCount }))
+            .catch(() => resolve({ deletedCount })); // Don't fail if logging fails
+        }
+      }
+    );
+  });
+}
+
 export function logAdminAction(action: string, details?: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const timestamp = new Date().toISOString();

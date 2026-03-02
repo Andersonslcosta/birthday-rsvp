@@ -241,15 +241,26 @@ Isso valida:
 
 ## 🔒 Segurança
 
-### Implementado
+### Autenticação & Autorização
+- ✅ **Access Tokens (15 minutos)** - Curta expiração para reduzir janela de risco
+- ✅ **Refresh Tokens (7 dias) em HTTP-only Cookies** - Previne XSS, armazenamento seguro
+- ✅ **Token Blacklist** - Logout imediato com revogação em memória
+- ✅ **Auto-renovação no Frontend** - Transparente para o usuário
 - ✅ Senhas com hash bcrypt (custo 10)
-- ✅ Tokens JWT com expiração de 24h
-- ✅ Rate limiting em endpoints sensíveis
-- ✅ CORS configurado para domínios específicos
-- ✅ Validação de Content-Type
-- ✅ Proteção contra timing attacks no login
-- ✅ Sanitização de entrada de dados
-- ✅ Variáveis sensíveis em `.env` (fora do git)
+- ✅ Proteção contra timing attacks (constant-time comparison)
+
+### Proteção contra Ataques
+- ✅ **CSRF Protection** - Validação de referer header
+- ✅ **Rate Limiting** - 5 tentativas login/15min, 100 reqs/15min por IP
+- ✅ **CSV Injection Prevention** - Escapa caracteres perigosos (=, +, -, @)
+- ✅ **CORS** - Configurado para domínios específicos
+- ✅ **Validação de Input** - Schemas Zod com type-safety
+- ✅ **Content-Type Validation** - JSON obrigatório em POST/PUT
+
+### Conformidade & Privacidade
+- ✅ **LGPD Ready** - Direito ao esquecimento, consentimento, retenção controlada
+- ✅ **Audit Logging** - Admin logs para rastreabilidade
+- ✅ **Dados Sensíveis** - Variáveis em `.env` (fora do git)
 
 ### Boas Práticas
 - 🔐 **Nunca** commite o arquivo `.env`
@@ -258,6 +269,36 @@ Isso valida:
 - 🌐 Configure HTTPS em produção
 - 📝 Monitore logs de tentativas de login
 - 🚫 Não exponha stack traces em produção
+
+### Estratégia de Token Blacklist
+
+**Abordagem Atual:** Memória (Set<string>) com TTL automático
+- ✅ Suficiente para aplicações simples (1 instância)
+- ✅ Nenhuma dependência externa (Redis/Upstash)
+- ✅ Logout é imediato
+- ⚠️ Tokens revogados são perdidos ao reiniciar (aceito para produção até junho)
+
+**Recomendação:** Manter até junho. Se escalar para múltiplas instâncias, migrar para Redis.
+
+## 📋 Conformidade LGPD
+
+### Coleta de Dados
+- **O que coletamos:** Nome, idade, confirmação de presença
+- **Por que:** Organização do evento
+- **Retenção:** Dados mantidos por 90 dias após evento, depois deletados
+- **Acesso:** Apenas administrador com senha
+
+### Direitos do Usuário
+1. **Direito de acesso** - Envie email solicitando dados
+2. **Direito ao esquecimento** - Use botão "Deletar confirmação" ou email
+3. **Portabilidade** - Exporte CSV do painel admin
+4. **Consentimento** - Aceitar termos antes de confirmar presença
+
+### Endpoints LGPD
+- `DELETE /api/admin/rsvp/:id` - Deletar confirmação específica
+- `DELETE /api/admin/rsvp` - Deletar TODOS os dados (requer senha)
+- `GET /api/admin/export` - Exportar dados em CSV
+- `DELETE /api/admin/cleanup-old` - Deletar registros > 90 dias (automático)
 
 ## 📦 Build e Deploy
 
